@@ -1,0 +1,47 @@
+## @file
+# Instance of HOB Library using HOB list from SMM Configuration Table.
+#
+# HOB Library implementation that retrieves the HOB List
+#  from the System Configuration Table in the SMM System Table.
+#
+# Copyright (c) 2015, Intel Corporation. All rights reserved.<BR>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution. The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php.
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = StandaloneSmmHobLib
+  FILE_GUID                      = 775C0070-0B42-4F81-95BC-F37570A1DA5A
+  MODULE_TYPE                    = DXE_SMM_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = HobLib|SMM_CORE DXE_SMM_DRIVER
+  CONSTRUCTOR                    = HobLibConstructor
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  HobLib.c
+
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+
+[LibraryClasses]
+  BaseMemoryLib
+  DebugLib
+  SmmServicesTableLib
+    
+[Guids]
+  gEfiHobListGuid                               ## CONSUMES  ## SystemTable
+

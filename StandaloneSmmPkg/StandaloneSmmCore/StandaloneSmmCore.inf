@@ -1,0 +1,88 @@
+## @file
+# This module provide an SMM CIS compliant implementation of SMM Core.
+#
+# Copyright (c) 2009 - 2015, Intel Corporation. All rights reserved.<BR>
+#
+# This program and the accompanying materials
+# are licensed and made available under the terms and conditions of the BSD License
+# which accompanies this distribution. The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = StandaloneSmmCore
+  FILE_GUID                      = 6E14B6FD-3600-4DD6-A17A-206B3B6DCE16
+  MODULE_TYPE                    = SMM_CORE
+  VERSION_STRING                 = 1.0
+  PI_SPECIFICATION_VERSION       = 0x0001000A
+  ENTRY_POINT                    = SmmMainFake
+
+#  VALID_ARCHITECTURES           = IA32 X64
+
+[Sources]
+  StandaloneSmmCore.c
+  StandaloneSmmCore.h
+  StandaloneSmmCorePrivateData.h
+  Page.c
+  Pool.c
+  Handle.c
+  Locate.c
+  Notify.c
+  Dependency.c
+  Dispatcher.c
+  Smi.c
+  InstallConfigurationTable.c
+  FwVol.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  StandaloneSmmPkg/StandaloneSmmPkg.dec
+  
+[LibraryClasses]
+  UefiDriverEntryPoint
+  BaseLib
+  BaseMemoryLib
+  PeCoffLib
+  CacheMaintenanceLib  
+  DebugLib
+  ReportStatusCodeLib
+  MemoryAllocationLib
+  HobLib
+  SmmMemLib
+  FvLib
+
+[Protocols]
+  gEfiSmmMemoryMapProtocolGuid
+  gEfiDxeSmmReadyToLockProtocolGuid             ## UNDEFINED # SmiHandlerRegister
+  gEfiSmmReadyToLockProtocolGuid                ## PRODUCES
+  gEfiSmmEndOfDxeProtocolGuid                   ## PRODUCES
+  gEfiLoadedImageProtocolGuid                   ## PRODUCES
+  gEfiSmmConfigurationSmmProtocolGuid
+
+[Pcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdLoadFixAddressSmmCodePageNumber     ## SOMETIMES_CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdLoadModuleAtFixAddressEnable        ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdMemoryProfileMemoryType             ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdMemoryProfilePropertyMask           ## CONSUMES
+
+[Guids]
+  gAprioriGuid                                  ## SOMETIMES_CONSUMES   ## File
+  gEfiEventDxeDispatchGuid                      ## PRODUCES             ## GUID # SmiHandlerRegister
+  gEfiEndOfDxeEventGroupGuid                    ## PRODUCES             ## GUID # SmiHandlerRegister
+  ## SOMETIMES_CONSUMES   ## GUID # Locate protocol
+  ## SOMETIMES_PRODUCES   ## GUID # SmiHandlerRegister
+  gEdkiiMemoryProfileGuid
+  gZeroGuid                                     ## SOMETIMES_CONSUMES   ## GUID
+  gEfiHobListGuid
+  gSmmCoreDataHobGuid
+  gSmmFvDispatchGuid
+  gSmmUefiInfoGuid
+  gEfiEventLegacyBootGuid
+  gEfiEventExitBootServicesGuid
+  gEfiEventReadyToBootGuid
+
