@@ -831,8 +831,8 @@ FreePool (
 EFI_STATUS
 EFIAPI
 StandaloneSmmCoreMemoryAllocationLibConstructor (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  IN EFI_HANDLE             ImageHandle,
+  IN EFI_SMM_SYSTEM_TABLE2  *SmmSystemTable
   )
 {
   SMM_CORE_PRIVATE_DATA           *SmmCorePrivate;
@@ -840,7 +840,7 @@ StandaloneSmmCoreMemoryAllocationLibConstructor (
   SMM_CORE_DATA_HOB_DATA          *DataInHob;
   VOID                            *HobStart;
   
-  HobStart = (VOID *)ImageHandle;
+  HobStart = GetHobList ();
   DEBUG ((EFI_D_INFO, "StandaloneSmmCoreMemoryAllocationLibConstructor - 0x%x\n", HobStart));
   
   //
@@ -867,6 +867,7 @@ StandaloneSmmCoreMemoryAllocationLibConstructor (
   //
   // Initialize memory service using free SMRAM
   //
+  DEBUG ((EFI_D_INFO, "SmmInitializeMemoryServices\n"));
   SmmInitializeMemoryServices ((UINTN)SmmCorePrivate->SmramRangeCount, (VOID *)(UINTN)SmmCorePrivate->SmramRanges);
   return EFI_SUCCESS;
 }

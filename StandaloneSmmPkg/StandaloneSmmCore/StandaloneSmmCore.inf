@@ -16,10 +16,10 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = StandaloneSmmCore
   FILE_GUID                      = 6E14B6FD-3600-4DD6-A17A-206B3B6DCE16
-  MODULE_TYPE                    = SMM_CORE
+  MODULE_TYPE                    = SMM_CORE_STANDALONE
   VERSION_STRING                 = 1.0
   PI_SPECIFICATION_VERSION       = 0x0001000A
-  ENTRY_POINT                    = SmmMainFake
+  ENTRY_POINT                    = SmmMainStandalone
 
 #  VALID_ARCHITECTURES           = IA32 X64
 
@@ -44,7 +44,7 @@
   StandaloneSmmPkg/StandaloneSmmPkg.dec
   
 [LibraryClasses]
-  UefiDriverEntryPoint
+  SmmCoreStandaloneEntryPoint
   BaseLib
   BaseMemoryLib
   PeCoffLib
@@ -57,7 +57,6 @@
   FvLib
 
 [Protocols]
-  gEfiSmmMemoryMapProtocolGuid
   gEfiDxeSmmReadyToLockProtocolGuid             ## UNDEFINED # SmiHandlerRegister
   gEfiSmmReadyToLockProtocolGuid                ## PRODUCES
   gEfiSmmEndOfDxeProtocolGuid                   ## PRODUCES

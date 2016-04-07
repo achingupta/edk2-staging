@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 
 
-#include <Uefi.h>
+#include <PiSmm.h>
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
@@ -22,22 +22,22 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 VOID
 EFIAPI
 ProcessLibraryConstructorList (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  IN EFI_HANDLE               ImageHandle,
+  IN IN EFI_SMM_SYSTEM_TABLE2 *SmmSystemTable
   );
 
 EFI_STATUS
 EFIAPI
 ProcessModuleEntryPointList (
-  IN EFI_HANDLE         ImageHandle,
-  IN EFI_SYSTEM_TABLE   *SystemTable
+  IN EFI_HANDLE               ImageHandle,
+  IN IN EFI_SMM_SYSTEM_TABLE2 *SmmSystemTable
   );
 
 VOID
 EFIAPI
 ProcessLibraryDestructorList (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  IN EFI_HANDLE               ImageHandle,
+  IN IN EFI_SMM_SYSTEM_TABLE2 *SmmSystemTable
   );
 
 /**
@@ -69,8 +69,8 @@ ProcessLibraryDestructorList (
 EFI_STATUS
 EFIAPI
 _ModuleEntryPoint (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  IN EFI_HANDLE               ImageHandle,
+  IN IN EFI_SMM_SYSTEM_TABLE2 *SmmSystemTable
   )
 {
   EFI_STATUS                 Status;
@@ -78,18 +78,18 @@ _ModuleEntryPoint (
   //
   // Call constructor for all libraries
   //
-  ProcessLibraryConstructorList (ImageHandle, SystemTable);
+  ProcessLibraryConstructorList (ImageHandle, SmmSystemTable);
 
   //
   // Call the driver entry point
   //
-  Status = ProcessModuleEntryPointList (ImageHandle, SystemTable);
+  Status = ProcessModuleEntryPointList (ImageHandle, SmmSystemTable);
 
   //
   // If all of the drivers returned errors, then invoke all of the library destructors
   //
   if (EFI_ERROR (Status)) {
-    ProcessLibraryDestructorList (ImageHandle, SystemTable);
+    ProcessLibraryDestructorList (ImageHandle, SmmSystemTable);
   }
 
   //

@@ -104,17 +104,6 @@ BOOLEAN  gDispatcherRunning = FALSE;
 BOOLEAN  gRequestDispatch = FALSE;
 
 //
-// List of file types supported by dispatcher
-//
-EFI_FV_FILETYPE mSmmFileTypes[] = {
-  EFI_FV_FILETYPE_SMM,
-  //
-  // Note: DXE core will process the FV image file, so skip it in SMM core
-  // EFI_FV_FILETYPE_FIRMWARE_VOLUME_IMAGE
-  //
-};
-
-//
 // The global variable is defined for Loading modules at fixed address feature to track the SMM code
 // memory range usage. It is a bit mapped array in which every bit indicates the correspoding 
 // memory page available or not. 
@@ -299,7 +288,9 @@ SmmLoadImage (
   )
 {
   VOID                           *Buffer;
+  UINTN                          Size;
   UINTN                          PageCount;
+  EFI_GUID                       *NameGuid;
   EFI_STATUS                     Status;
   EFI_PHYSICAL_ADDRESS           DstBuffer;
   PE_COFF_LOADER_IMAGE_CONTEXT   ImageContext;
@@ -310,7 +301,9 @@ SmmLoadImage (
   if (Buffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
-  
+  Size                 = DriverEntry->Pe32DataSize;
+  NameGuid             = &DriverEntry->FileName;
+
   Status               = EFI_SUCCESS;
 
   //
@@ -582,12 +575,13 @@ SmmGetDepexSectionAndPreProccess (
   )
 {
   EFI_STATUS                     Status;
+  EFI_SECTION_TYPE               SectionType;
 
   //
   // Grab Depex info, it will never be free'ed.
   // (Note: DriverEntry->Depex is in DXE memory)
   //
-  
+  SectionType         = EFI_SECTION_SMM_DEPEX;
   //
   // Data already read
   //
@@ -734,6 +728,7 @@ SmmDispatcher (
         Status = ((EFI_IMAGE_ENTRY_POINT)(UINTN)DriverEntry->ImageEntryPoint)(DriverEntry->ImageHandle, mEfiSystemTable);
       }
       if (EFI_ERROR(Status)){
+        DEBUG ((EFI_D_INFO, "StartImage Status - %r\n", Status));
         SmmFreePages(DriverEntry->ImageBuffer, DriverEntry->NumberOfPage);
       }
 
@@ -1099,7 +1094,7 @@ SmmFvDispatchHandler (
   //
   Status = SmmDispatcher ();
   
-  return Status;
+  return EFI_SUCCESS;
 }
 
 /**

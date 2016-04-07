@@ -24,7 +24,7 @@
 #
 # The following information is for reference only and not required by the build tools.
 #
-#  VALID_ARCHITECTURES           = IA32 X64 AArch64
+#  VALID_ARCHITECTURES           = IA32 X64
 #
 
 [Sources]
@@ -37,13 +37,11 @@
 [Sources.X64]
   X64/LoadSmmCore.c
 
-[Sources.AArch64]
-  X64/LoadSmmCore.c
-
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   StandaloneSmmPkg/StandaloneSmmPkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
   
 [LibraryClasses]
   PeimEntryPoint
@@ -60,6 +58,7 @@
 [Guids]
   gSmmCoreDataHobGuid
   gEfiEventDxeDispatchGuid
+  gEfiSmmPeiSmramMemoryReserveGuid
 
 [Ppis]
   gPeiSmmAccessPpiGuid                     # PROTOCOL ALWAYS_CONSUMED

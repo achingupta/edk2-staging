@@ -18,10 +18,10 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = StandaloneSmmMemoryAllocationLib
   FILE_GUID                      = 68FCE288-2B41-485C-BD28-C4704E63024A
-  MODULE_TYPE                    = DXE_SMM_DRIVER
+  MODULE_TYPE                    = SMM_STANDALONE
   VERSION_STRING                 = 1.0
   PI_SPECIFICATION_VERSION       = 0x0001000A
-  LIBRARY_CLASS                  = MemoryAllocationLib|DXE_SMM_DRIVER
+  LIBRARY_CLASS                  = MemoryAllocationLib|SMM_STANDALONE
 
 #
 #  VALID_ARCHITECTURES           = IA32 X64

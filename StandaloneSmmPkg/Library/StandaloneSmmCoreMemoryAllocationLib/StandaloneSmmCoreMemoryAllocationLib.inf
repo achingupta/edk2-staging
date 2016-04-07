@@ -19,10 +19,10 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = StandaloneSmmCoreMemoryAllocationLib
   FILE_GUID                      = DCDCBE1D-E760-4E1D-85B4-96E3F0439C41
-  MODULE_TYPE                    = SMM_CORE
+  MODULE_TYPE                    = SMM_CORE_STANDALONE
   VERSION_STRING                 = 1.0
   PI_SPECIFICATION_VERSION       = 0x0001000A
-  LIBRARY_CLASS                  = MemoryAllocationLib|SMM_CORE
+  LIBRARY_CLASS                  = MemoryAllocationLib|SMM_CORE_STANDALONE
   CONSTRUCTOR                    = StandaloneSmmCoreMemoryAllocationLibConstructor
 
 #

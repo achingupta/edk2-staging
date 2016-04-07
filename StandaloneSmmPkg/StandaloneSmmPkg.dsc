@@ -51,7 +51,7 @@
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   CacheMaintenanceLib|MdePkg/Library/BaseCacheMaintenanceLib/BaseCacheMaintenanceLib.inf
   PeCoffLib|MdePkg/Library/BasePeCoffLib/BasePeCoffLib.inf
-#  PeCoffGetEntryPointLib|MdePkg/Library/BasePeCoffGetEntryPointLib/BasePeCoffGetEntryPointLib.inf
+  PeCoffGetEntryPointLib|MdePkg/Library/BasePeCoffGetEntryPointLib/BasePeCoffGetEntryPointLib.inf
   PeCoffExtraActionLib|MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLibOptDxe/BaseMemoryLibOptDxe.inf
   
@@ -60,15 +60,17 @@
   #
   OemHookStatusCodeLib|MdeModulePkg/Library/OemHookStatusCodeLibNull/OemHookStatusCodeLibNull.inf
 !if $(DEBUG_MESSAGE) == TRUE
-#  DebugLib|MdeModulePkg/Library/PeiDxeDebugLibReportStatusCode/PeiDxeDebugLibReportStatusCode.inf
-  DebugLib|IntelFrameworkModulePkg/Library/PeiDxeDebugLibReportStatusCode/PeiDxeDebugLibReportStatusCode.inf
-  ReportStatusCodeLib|MdeModulePkg/Library/SmmReportStatusCodeLib/SmmReportStatusCodeLib.inf
+  DebugLib|StandaloneSmmPkg/Override/MdeModulePkg/Library/PeiDxeDebugLibReportStatusCode/PeiDxeDebugLibReportStatusCode.inf
+  ReportStatusCodeLib|StandaloneSmmPkg/Override/MdeModulePkg/Library/SmmReportStatusCodeLib/SmmReportStatusCodeLib.inf
 !else
   DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
   ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
 !endif
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  DebugAgentLib|MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
+  UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
+
   ExtractGuidedSectionLib|StandaloneSmmPkg/Library/SimpleExtractGuidedSectionLib/SimpleExtractGuidedSectionLib.inf
   FvLib|StandaloneSmmPkg/Library/FvLib/FvLib.inf
 
@@ -116,18 +118,38 @@
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
 
 [LibraryClasses.common.SMM_CORE]
-  UefiDriverEntryPoint|StandaloneSmmPkg/Library/StandaloneSmmDriverEntryPoint/StandaloneSmmDriverEntryPoint.inf
+  UefiDriverEntryPoint|MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf
+  SmmServicesTableLib|MdeModulePkg/Library/PiSmmCoreSmmServicesTableLib/PiSmmCoreSmmServicesTableLib.inf
+  SmmMemLib|MdePkg/Library/SmmMemLib/SmmMemLib.inf
+  MemoryAllocationLib|MdeModulePkg/Library/PiSmmCoreMemoryAllocationLib/PiSmmCoreMemoryAllocationLib.inf
+  HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
+
+[LibraryClasses.common.DXE_SMM_DRIVER]
+  UefiDriverEntryPoint|MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf
+  SmmServicesTableLib|MdePkg/Library/SmmServicesTableLib/SmmServicesTableLib.inf
+  SmmMemLib|MdePkg/Library/SmmMemLib/SmmMemLib.inf
+  MemoryAllocationLib|MdePkg/Library/SmmMemoryAllocationLib/SmmMemoryAllocationLib.inf
+  HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
+  SmmCpuPlatformHookLib|UefiCpuPkg/Library/SmmCpuPlatformHookLibNull/SmmCpuPlatformHookLibNull.inf
+  CpuExceptionHandlerLib|UefiCpuPkg/Library/CpuExceptionHandlerLib/SmmCpuExceptionHandlerLib.inf
+  SmmCpuFeaturesLib|UefiCpuPkg/Library/SmmCpuFeaturesLib/SmmCpuFeaturesLib.inf
+  
+[LibraryClasses.common.SMM_CORE_STANDALONE]
+  SmmCoreStandaloneEntryPoint|StandaloneSmmPkg/Library/StandaloneSmmCoreEntryPoint/StandaloneSmmCoreEntryPoint.inf
   SmmServicesTableLib|StandaloneSmmPkg/Library/StandaloneSmmCoreSmmServicesTableLib/StandaloneSmmCoreSmmServicesTableLib.inf
   SmmMemLib|StandaloneSmmPkg/Library/StandaloneSmmMemLib/StandaloneSmmMemLib.inf
   MemoryAllocationLib|StandaloneSmmPkg/Library/StandaloneSmmCoreMemoryAllocationLib/StandaloneSmmCoreMemoryAllocationLib.inf
   HobLib|StandaloneSmmPkg/Library/StandaloneSmmHobLib/StandaloneSmmHobLib.inf
-
-[LibraryClasses.common.DXE_SMM_DRIVER]
-  UefiDriverEntryPoint|StandaloneSmmPkg/Library/StandaloneSmmDriverEntryPoint/StandaloneSmmDriverEntryPoint.inf
+  
+[LibraryClasses.common.SMM_STANDALONE]
+  SmmStandaloneDriverEntryPoint|StandaloneSmmPkg/Library/StandaloneSmmDriverEntryPoint/StandaloneSmmDriverEntryPoint.inf
   SmmServicesTableLib|StandaloneSmmPkg/Library/StandaloneSmmServicesTableLib/StandaloneSmmServicesTableLib.inf
   SmmMemLib|StandaloneSmmPkg/Library/StandaloneSmmMemLib/StandaloneSmmMemLib.inf
   MemoryAllocationLib|StandaloneSmmPkg/Library/StandaloneSmmMemoryAllocationLib/StandaloneSmmMemoryAllocationLib.inf
   HobLib|StandaloneSmmPkg/Library/StandaloneSmmHobLib/StandaloneSmmHobLib.inf
+  SmmCpuPlatformHookLib|UefiCpuPkg/Library/SmmCpuPlatformHookLibNull/SmmCpuPlatformHookLibNull.inf
+  CpuExceptionHandlerLib|StandaloneSmmPkg/Override/UefiCpuPkg/Library/CpuExceptionHandlerLib/SmmCpuExceptionHandlerLib.inf
+  SmmCpuFeaturesLib|StandaloneSmmPkg/Override/UefiCpuPkg/Library/SmmCpuFeaturesLib/StandaloneSmmCpuFeaturesLib.inf
 
 ################################################################################
 #
@@ -171,7 +193,7 @@
   #  SMM IPL
   #
   StandaloneSmmPkg/StandaloneSmmIplPei/StandaloneSmmIplPei.inf
-  StandaloneSmmPkg/StandaloneSmmIplPei/StandaloneSmmIplPeiDxeStub.inf
+  StandaloneSmmPkg/StandaloneSmmIplDxeGateway/StandaloneSmmIplDxeGateway.inf
 
   #
   # SMM Core
@@ -181,7 +203,8 @@
   #
   # SMM CPU
   #
-  StandaloneSmmPkg/PiSmmCpuStandaloneSmm/PiSmmCpuStandaloneSmm.inf
+  StandaloneSmmPkg/X86/CpuMpInfoPei/CpuMpInfoPei.inf
+  StandaloneSmmPkg/X86/PiSmmCpuStandaloneSmm/PiSmmCpuStandaloneSmm.inf
 
 ###################################################################################################
 #

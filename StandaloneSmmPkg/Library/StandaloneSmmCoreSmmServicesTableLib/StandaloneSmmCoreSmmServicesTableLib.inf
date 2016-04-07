@@ -17,10 +17,10 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = StandaloneSmmCoreSmmServicesTableLib
   FILE_GUID                      = 047A3FC6-32F0-4ABC-8CD8-FB171A014831
-  MODULE_TYPE                    = SMM_CORE
+  MODULE_TYPE                    = SMM_CORE_STANDALONE
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = SmmServicesTableLib|SMM_CORE
   PI_SPECIFICATION_VERSION       = 0x0001000A
+  LIBRARY_CLASS                  = SmmServicesTableLib|SMM_CORE_STANDALONE
   CONSTRUCTOR                    = SmmCoreSmmServicesTableLibConstructor
 
 #

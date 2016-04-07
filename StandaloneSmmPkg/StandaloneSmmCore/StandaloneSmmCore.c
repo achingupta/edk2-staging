@@ -101,10 +101,6 @@ EFI_SYSTEM_TABLE                *mEfiSystemTable;
 UINTN                           mSmramRangeCount;
 EFI_SMRAM_DESCRIPTOR            *mSmramRanges;
 
-EFI_SMM_MEMORY_MAP_PROTOCOL  mSmmMemoryMapProtocol = {
-  SmmGetMemoryMap,
-};
-
 /**
   Place holder function until all the SMM System Table Service are available.
 
@@ -162,7 +158,7 @@ SmmLegacyBootHandler (
   )
 {
   EFI_HANDLE  SmmHandle;
-  EFI_STATUS  Status = EFI_SUCCESS;
+  EFI_STATUS  Status;
 
   if (!mInLegacyBoot) {
     SmmHandle = NULL;
@@ -172,7 +168,6 @@ SmmLegacyBootHandler (
                EFI_NATIVE_INTERFACE,
                NULL
                );
-    if (EFI_ERROR(Status)) return Status;
   }
   mInLegacyBoot = TRUE;
   return EFI_SUCCESS;
@@ -211,7 +206,6 @@ SmmExitBootServiceHandler (
                EFI_NATIVE_INTERFACE,
                NULL
                );
-    if (EFI_ERROR(Status)) return Status;
   }
   mInExitBootServices = TRUE;
   return EFI_SUCCESS;
@@ -250,7 +244,6 @@ SmmReadyToBootHandler (
                EFI_NATIVE_INTERFACE,
                NULL
                );
-    if (EFI_ERROR(Status)) return Status;
   }
   mInReadyToBoot = TRUE;
   return EFI_SUCCESS;
@@ -399,7 +392,6 @@ SmmUefiInfoHandler (
                EFI_NATIVE_INTERFACE,
                mEfiSystemTable
                );
-    if (EFI_ERROR(Status)) return Status;
   }
   
   return EFI_SUCCESS;
@@ -572,18 +564,19 @@ GetHobListSize (
 **/
 EFI_STATUS
 EFIAPI
-SmmMain (
+SmmMainStandalone (
   IN VOID  *HobStart
   )
 {
   EFI_STATUS                      Status;
   UINTN                           Index;
-  EFI_HANDLE                      UserHandle;
   VOID                            *SmmHobStart;
   UINTN                           HobSize;
   VOID                            *Registration;
   EFI_HOB_GUID_TYPE               *GuidHob;
   SMM_CORE_DATA_HOB_DATA          *DataInHob;
+
+  ProcessLibraryConstructorList (NULL, &gSmmCoreSmst);
 
   DEBUG ((EFI_D_INFO, "SmmMain - 0x%x\n", HobStart));
   
@@ -598,7 +591,6 @@ SmmMain (
   gSmmCorePrivate = (SMM_CORE_PRIVATE_DATA *)(UINTN)DataInHob->Address;
 
   {
-    UINTN                Index;
     EFI_SMRAM_DESCRIPTOR *SmramRanges;
 
     DEBUG ((EFI_D_INFO, "SmramRangeCount - 0x%x\n", gSmmCorePrivate->SmramRangeCount));
@@ -656,19 +648,6 @@ SmmMain (
     ASSERT_EFI_ERROR (Status);
   }
   
-  DEBUG ((EFI_D_INFO, "SmmInstallProtocolInterface - SmmMemoryMapProtocol\n"));
-  //
-  // Install SmmMemoryMapProtocol
-  //
-  UserHandle = NULL;
-  Status = SmmInstallProtocolInterface (
-             &UserHandle,
-             &gEfiSmmMemoryMapProtocolGuid,
-             EFI_NATIVE_INTERFACE,
-             &mSmmMemoryMapProtocol
-             );
-  ASSERT_EFI_ERROR (Status);
-  
   DEBUG ((EFI_D_INFO, "SmmRegisterProtocolNotify - SmmConfigurationSmmProtocol\n"));
   Status = SmmRegisterProtocolNotify (
              &gEfiSmmConfigurationSmmProtocolGuid,
@@ -689,30 +668,4 @@ SmmMain (
   DEBUG ((EFI_D_INFO, "SmmMain Done!\n"));
 
   return EFI_SUCCESS;
-}
-
-
-/**
-  The Entry Point for SMM Core
-
-  Install DXE Protocols and reload SMM Core into SMRAM and register SMM Core 
-  EntryPoint on the SMI vector.
-
-  Note: This function is called for both DXE invocation and SMRAM invocation.
-
-  @param  ImageHandle    The firmware allocated handle for the EFI image.
-  @param  SystemTable    A pointer to the EFI System Table.
-
-  @retval EFI_SUCCESS    The entry point is executed successfully.
-  @retval Other          Some error occurred when executing this entry point.
-
-**/
-EFI_STATUS
-EFIAPI
-SmmMainFake (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
-  )
-{
-  return SmmMain ((VOID *)ImageHandle);
 }

@@ -30,11 +30,11 @@ EFI_SMM_SYSTEM_TABLE2         *gSmst = NULL;
 EFI_STATUS
 EFIAPI
 StandaloneSmmServicesTableLibConstructor (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  IN EFI_HANDLE             ImageHandle,
+  IN EFI_SMM_SYSTEM_TABLE2  *SmmSystemTable
   )
 {
-  gSmst = (EFI_SMM_SYSTEM_TABLE2 *)SystemTable;
+  gSmst = SmmSystemTable;
   return EFI_SUCCESS;
 }
 

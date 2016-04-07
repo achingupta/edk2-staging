@@ -260,8 +260,8 @@ SmmSetMem (
 EFI_STATUS
 EFIAPI
 SmmMemLibConstructor (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  IN EFI_HANDLE             ImageHandle,
+  IN EFI_SMM_SYSTEM_TABLE2  *SmmSystemTable
   )
 {
 

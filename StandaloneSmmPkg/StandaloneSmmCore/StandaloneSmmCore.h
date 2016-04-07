@@ -24,7 +24,6 @@
 #include <Protocol/SmmEndOfDxe.h>
 #include <Protocol/SmmCommunication.h>
 #include <Protocol/LoadedImage.h>       
-#include <Protocol/SmmMemoryMap.h>
 #include <Protocol/SmmConfigurationSmm.h>
 
 #include <Guid/Apriori.h>
@@ -36,6 +35,7 @@
 #include <Guid/SmmUefiInfo.h>
 #include <Guid/SmmFvDispatch.h>
 
+#include <Library/SmmCoreStandaloneEntryPoint.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/PeCoffLib.h>
@@ -914,16 +914,6 @@ SmmIsSchedulable (
 VOID
 DumpSmramInfo (
   VOID
-  );
-
-EFI_STATUS
-EFIAPI
-SmmGetMemoryMap (
-  IN OUT UINTN                       *MemoryMapSize,
-  IN OUT EFI_MEMORY_DESCRIPTOR       *MemoryMap,
-  OUT    UINTN                       *MapKey,
-  OUT    UINTN                       *DescriptorSize,
-  OUT    UINT32                      *DescriptorVersion
   );
 
 extern UINTN                    mSmramRangeCount;

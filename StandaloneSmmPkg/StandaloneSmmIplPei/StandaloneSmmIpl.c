@@ -32,6 +32,7 @@
 #include <Library/PcdLib.h>
 
 #include <Guid/EventGroup.h>
+#include <Guid/SmramMemoryReserve.h>
 #include <Guid/SmmCoreData.h>
 
 EFI_STATUS
@@ -64,7 +65,7 @@ SMM_CORE_PRIVATE_DATA  mSmmCorePrivateData = {
 //
 // Global pointer used to access mSmmCorePrivateData from outside and inside SMM
 //
-SMM_CORE_PRIVATE_DATA  *gSmmCorePrivate = &mSmmCorePrivateData;
+SMM_CORE_PRIVATE_DATA  *gSmmCorePrivate;
 
 //
 // SMM IPL global variables
@@ -458,7 +459,7 @@ GetSectionFromAnyFvByFileType  (
       //
       Status = PeiServicesFfsGetVolumeInfo (VolumeHandle, &VolumeInfo);
       if (!EFI_ERROR (Status)) {
-        mSmmCorePrivateData.StandaloneBfvAddress = (EFI_PHYSICAL_ADDRESS)(UINTN)VolumeInfo.FvStart;
+        gSmmCorePrivate->StandaloneBfvAddress = (EFI_PHYSICAL_ADDRESS)(UINTN)VolumeInfo.FvStart;
       }
 
     }
@@ -695,11 +696,18 @@ SmmIplEntry (
   UINT64                          MaxSize;
   UINT64                          SmmCodeSize;
   SMM_CORE_DATA_HOB_DATA          SmmCoreDataHobData;
-  
+  VOID                            *GuidHob;
+  EFI_SMRAM_HOB_DESCRIPTOR_BLOCK  *DescriptorBlock;
+
   //
   // Build Hob for SMM and DXE phase
   //
-  SmmCoreDataHobData.Address = (EFI_PHYSICAL_ADDRESS)(UINTN)gSmmCorePrivate;
+  SmmCoreDataHobData.Address = (EFI_PHYSICAL_ADDRESS)(UINTN)AllocateRuntimePages(EFI_SIZE_TO_PAGES(sizeof(mSmmCorePrivateData)));
+  ASSERT(SmmCoreDataHobData.Address != 0);
+  gSmmCorePrivate = (VOID *)(UINTN)SmmCoreDataHobData.Address;
+  CopyMem ((VOID *)(UINTN)SmmCoreDataHobData.Address, &mSmmCorePrivateData, sizeof(mSmmCorePrivateData));
+  DEBUG((EFI_D_INFO, "gSmmCorePrivate - 0x%x\n", gSmmCorePrivate));
+
   BuildGuidDataHob (
     &gSmmCoreDataHobGuid,
     (VOID *)&SmmCoreDataHobData,
@@ -715,17 +723,15 @@ SmmIplEntry (
   //
   // Get SMRAM information
   //
-  Size = 0;
-  Status = SmmAccess->GetCapabilities ((EFI_PEI_SERVICES **)PeiServices, SmmAccess, &Size, NULL);
-  ASSERT (Status == EFI_BUFFER_TOO_SMALL);
+  GuidHob = GetFirstGuidHob (&gEfiSmmPeiSmramMemoryReserveGuid);
+  ASSERT (GuidHob != NULL);
+  DescriptorBlock = (EFI_SMRAM_HOB_DESCRIPTOR_BLOCK *)GET_GUID_HOB_DATA(GuidHob);
 
+  gSmmCorePrivate->SmramRangeCount = DescriptorBlock->NumberOfSmmReservedRegions;
+  Size = (DescriptorBlock->NumberOfSmmReservedRegions) * sizeof(EFI_SMRAM_DESCRIPTOR);
   gSmmCorePrivate->SmramRanges = (EFI_PHYSICAL_ADDRESS)(UINTN)AllocatePool (Size);
   ASSERT (gSmmCorePrivate->SmramRanges != 0);
-
-  Status = SmmAccess->GetCapabilities ((EFI_PEI_SERVICES **)PeiServices, SmmAccess, &Size, (VOID *)(UINTN)gSmmCorePrivate->SmramRanges);
-  ASSERT_EFI_ERROR (Status);
-
-  gSmmCorePrivate->SmramRangeCount = Size / sizeof (EFI_SMRAM_DESCRIPTOR);
+  CopyMem ((VOID *)(UINTN)gSmmCorePrivate->SmramRanges, DescriptorBlock->Descriptor, Size);
 
   //
   // Open all SMRAM ranges
