@@ -579,6 +579,7 @@ SmmMainStandalone (
   EFI_SMRAM_HOB_DESCRIPTOR_BLOCK  *SmramRangesHobData;
   EFI_SMRAM_DESCRIPTOR            *SmramRanges;
   UINT32                          SmramRangeCount;
+  EFI_HOB_FIRMWARE_VOLUME         *BfvHob;
 
   ProcessLibraryConstructorList (HobStart, &gSmmCoreSmst);
 
@@ -654,6 +655,15 @@ SmmMainStandalone (
   CopyMem (mSmramRanges, (VOID *)(UINTN)SmramRanges, mSmramRangeCount * sizeof (EFI_SMRAM_DESCRIPTOR));
 
   //
+  // Get Boot Firmware Volume address from the BFV Hob
+  //
+  BfvHob = GetFirstHob (EFI_HOB_TYPE_FV);
+  if (BfvHob != NULL) {
+    DEBUG ((EFI_D_INFO, "BFV address - 0x%x\n", BfvHob->BaseAddress));
+    DEBUG ((EFI_D_INFO, "BFV size    - 0x%x\n", BfvHob->Length));
+    gSmmCorePrivate->StandaloneBfvAddress = BfvHob->BaseAddress;
+  }
+
   gSmmCorePrivate->Smst          = (EFI_PHYSICAL_ADDRESS)(UINTN)&gSmmCoreSmst;
   gSmmCorePrivate->SmmEntryPoint = (EFI_PHYSICAL_ADDRESS)(UINTN)SmmEntryPoint;
   
