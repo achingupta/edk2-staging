@@ -158,7 +158,7 @@ SmmLegacyBootHandler (
   )
 {
   EFI_HANDLE  SmmHandle;
-  EFI_STATUS  Status;
+  EFI_STATUS  Status = EFI_SUCCESS;
 
   if (!mInLegacyBoot) {
     SmmHandle = NULL;
@@ -170,7 +170,7 @@ SmmLegacyBootHandler (
                );
   }
   mInLegacyBoot = TRUE;
-  return EFI_SUCCESS;
+  return Status;
 }
 
 /**
@@ -195,7 +195,7 @@ SmmExitBootServiceHandler (
   )
 {
   EFI_HANDLE  SmmHandle;
-  EFI_STATUS  Status;
+  EFI_STATUS  Status = EFI_SUCCESS;
   STATIC BOOLEAN mInExitBootServices = FALSE;
 
   if (!mInExitBootServices) {
@@ -208,7 +208,7 @@ SmmExitBootServiceHandler (
                );
   }
   mInExitBootServices = TRUE;
-  return EFI_SUCCESS;
+  return Status;
 }
 
 /**
@@ -233,7 +233,7 @@ SmmReadyToBootHandler (
   )
 {
   EFI_HANDLE  SmmHandle;
-  EFI_STATUS  Status;
+  EFI_STATUS  Status = EFI_SUCCESS;
   STATIC BOOLEAN mInReadyToBoot = FALSE;
 
   if (!mInReadyToBoot) {
@@ -246,7 +246,7 @@ SmmReadyToBootHandler (
                );
   }
   mInReadyToBoot = TRUE;
-  return EFI_SUCCESS;
+  return Status;
 }
 
 /**
@@ -375,7 +375,7 @@ SmmUefiInfoHandler (
 {
   EFI_SMM_COMMUNICATE_UEFI_INFO_DATA    *CommunicationData;
   EFI_HANDLE                            SmmHandle;
-  EFI_STATUS                            Status;
+  EFI_STATUS                            Status = EFI_SUCCESS;
 
   DEBUG ((EFI_D_INFO, "SmmUefiInfoHandler\n"));
 
@@ -393,8 +393,8 @@ SmmUefiInfoHandler (
                mEfiSystemTable
                );
   }
-  
-  return EFI_SUCCESS;
+
+  return Status;
 }
 
 /**

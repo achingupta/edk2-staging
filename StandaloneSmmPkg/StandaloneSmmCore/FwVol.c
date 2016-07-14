@@ -92,7 +92,7 @@ Returns:
         Status = FfsFindSectionData(EFI_SECTION_PE32, FileHeader, &Pe32Data, &Pe32DataSize);
         DEBUG((EFI_D_INFO, "Find PE data - 0x%x\n", Pe32Data));
         DepexStatus = FfsFindSectionData(EFI_SECTION_SMM_DEPEX, FileHeader, &Depex, &DepexSize);
-        if (!EFI_ERROR(Status)) {
+        if (!EFI_ERROR(DepexStatus)) {
           SmmAddToDriverList(FwVolHeader, Pe32Data, Pe32DataSize, Depex, DepexSize, &FileHeader->Name);
         }
       }

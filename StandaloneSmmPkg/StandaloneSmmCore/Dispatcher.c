@@ -288,9 +288,7 @@ SmmLoadImage (
   )
 {
   VOID                           *Buffer;
-  UINTN                          Size;
   UINTN                          PageCount;
-  EFI_GUID                       *NameGuid;
   EFI_STATUS                     Status;
   EFI_PHYSICAL_ADDRESS           DstBuffer;
   PE_COFF_LOADER_IMAGE_CONTEXT   ImageContext;
@@ -301,8 +299,6 @@ SmmLoadImage (
   if (Buffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
-  Size                 = DriverEntry->Pe32DataSize;
-  NameGuid             = &DriverEntry->FileName;
 
   Status               = EFI_SUCCESS;
 
@@ -575,13 +571,7 @@ SmmGetDepexSectionAndPreProccess (
   )
 {
   EFI_STATUS                     Status;
-  EFI_SECTION_TYPE               SectionType;
 
-  //
-  // Grab Depex info, it will never be free'ed.
-  // (Note: DriverEntry->Depex is in DXE memory)
-  //
-  SectionType         = EFI_SECTION_SMM_DEPEX;
   //
   // Data already read
   //
@@ -1093,8 +1083,8 @@ SmmFvDispatchHandler (
   // discovered SMM drivers that have been discovered but not dispatched.
   //
   Status = SmmDispatcher ();
-  
-  return EFI_SUCCESS;
+
+  return Status;
 }
 
 /**
