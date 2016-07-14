@@ -41,3 +41,7 @@
   gArmPlatformTokenSpaceGuid.PL011UartFractional|0|UINT32|0x0000002D
 
 [PcdsFixedAtBuild, PcdsPatchableInModule]
+  gArmTokenSpaceGuid.PcdFdBaseAddress|0|UINT64|0x0000002B
+  gArmTokenSpaceGuid.PcdFdSize|0|UINT32|0x0000002C
+  gArmTokenSpaceGuid.PcdFvBaseAddress|0|UINT64|0x0000002D
+  gArmTokenSpaceGuid.PcdFvSize|0|UINT32|0x0000002E
