@@ -36,5 +36,8 @@
   gEfiSmmConfigurationSmmProtocolGuid      =  { 0x4f81defe, 0x3221, 0x4682, { 0xbf, 0xfc, 0xe7, 0xd2, 0x1b, 0x4a, 0xa3, 0x17 }}
 
 [PcdsFixedAtBuild]
+  gArmPlatformTokenSpaceGuid.PL011UartClkInHz|24000000|UINT32|0x0000001F
+  gArmPlatformTokenSpaceGuid.PL011UartInteger|0|UINT32|0x00000020
+  gArmPlatformTokenSpaceGuid.PL011UartFractional|0|UINT32|0x0000002D
 
 [PcdsFixedAtBuild, PcdsPatchableInModule]
