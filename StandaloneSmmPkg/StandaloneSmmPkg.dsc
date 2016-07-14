@@ -24,7 +24,7 @@
   PLATFORM_VERSION               = 0.4
   DSC_SPECIFICATION              = 0x00010005
   OUTPUT_DIRECTORY               = Build/StandaloneSmmPkg
-  SUPPORTED_ARCHITECTURES        = IA32|X64
+  SUPPORTED_ARCHITECTURES        = IA32|X64|AARCH64
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
 
@@ -96,6 +96,11 @@
   LocalApicLib|UefiCpuPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLib.inf
   SmmLib|Vlv2TbltDevicePkg/Library/PchSmmLib/PchSmmLib.inf
 
+[LibraryClasses.AARCH64]
+  CacheMaintenanceLib|ArmPkg/Library/ArmCacheMaintenanceLib/ArmCacheMaintenanceLib.inf
+  BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
+  ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
+  ArmSvcLib|ArmPkg/Library/ArmSvcLib/ArmSvcLib.inf
 [LibraryClasses.common.PEIM]
   PeimEntryPoint|MdePkg/Library/PeimEntryPoint/PeimEntryPoint.inf
   PeiServicesTablePointerLib|MdePkg/Library/PeiServicesTablePointerLibIdt/PeiServicesTablePointerLibIdt.inf
@@ -133,16 +138,16 @@
   SmmCpuPlatformHookLib|UefiCpuPkg/Library/SmmCpuPlatformHookLibNull/SmmCpuPlatformHookLibNull.inf
   CpuExceptionHandlerLib|UefiCpuPkg/Library/CpuExceptionHandlerLib/SmmCpuExceptionHandlerLib.inf
   SmmCpuFeaturesLib|UefiCpuPkg/Library/SmmCpuFeaturesLib/SmmCpuFeaturesLib.inf
-  
+
 [LibraryClasses.common.SMM_CORE_STANDALONE]
   SmmCoreStandaloneEntryPoint|StandaloneSmmPkg/Library/StandaloneSmmCoreEntryPoint/StandaloneSmmCoreEntryPoint.inf
   SmmServicesTableLib|StandaloneSmmPkg/Library/StandaloneSmmCoreSmmServicesTableLib/StandaloneSmmCoreSmmServicesTableLib.inf
   SmmMemLib|StandaloneSmmPkg/Library/StandaloneSmmMemLib/StandaloneSmmMemLib.inf
   MemoryAllocationLib|StandaloneSmmPkg/Library/StandaloneSmmCoreMemoryAllocationLib/StandaloneSmmCoreMemoryAllocationLib.inf
   HobLib|StandaloneSmmPkg/Library/StandaloneSmmHobLib/StandaloneSmmHobLib.inf
-  
+
 [LibraryClasses.common.SMM_STANDALONE]
-  SmmStandaloneDriverEntryPoint|StandaloneSmmPkg/Library/StandaloneSmmDriverEntryPoint/StandaloneSmmDriverEntryPoint.inf
+  StandaloneSmmDriverEntryPoint|StandaloneSmmPkg/Library/StandaloneSmmDriverEntryPoint/StandaloneSmmDriverEntryPoint.inf
   SmmServicesTableLib|StandaloneSmmPkg/Library/StandaloneSmmServicesTableLib/StandaloneSmmServicesTableLib.inf
   SmmMemLib|StandaloneSmmPkg/Library/StandaloneSmmMemLib/StandaloneSmmMemLib.inf
   MemoryAllocationLib|StandaloneSmmPkg/Library/StandaloneSmmMemoryAllocationLib/StandaloneSmmMemoryAllocationLib.inf
@@ -188,17 +193,18 @@
 #       generated for it, but the binary will not be put into any firmware volume.
 #
 ###################################################################################################
-[Components]
-  #
-  #  SMM IPL
-  #
-  StandaloneSmmPkg/StandaloneSmmIplPei/StandaloneSmmIplPei.inf
-  StandaloneSmmPkg/StandaloneSmmIplDxeGateway/StandaloneSmmIplDxeGateway.inf
-
+[Components.common]
   #
   # SMM Core
   #
   StandaloneSmmPkg/StandaloneSmmCore/StandaloneSmmCore.inf
+
+[Components.IA32, Components.X64]
+  #
+  #  SMM IPL
+  #
+  StandaloneSmmPkg/StandaloneSmmIplPei/StandaloneSmmIplPei.inf
+  StandaloneSmmPkg/StandaloneSmmIplPei/StandaloneSmmIplPeiDxeStub.inf
 
   #
   # SMM CPU
