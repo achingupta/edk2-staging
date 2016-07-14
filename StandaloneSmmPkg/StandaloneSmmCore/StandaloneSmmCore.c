@@ -575,33 +575,84 @@ SmmMainStandalone (
   VOID                            *Registration;
   EFI_HOB_GUID_TYPE               *GuidHob;
   SMM_CORE_DATA_HOB_DATA          *DataInHob;
+  EFI_HOB_GUID_TYPE               *SmramRangesHob;
+  EFI_SMRAM_HOB_DESCRIPTOR_BLOCK  *SmramRangesHobData;
+  EFI_SMRAM_DESCRIPTOR            *SmramRanges;
+  UINT32                          SmramRangeCount;
 
   ProcessLibraryConstructorList (HobStart, &gSmmCoreSmst);
 
   DEBUG ((EFI_D_INFO, "SmmMain - 0x%x\n", HobStart));
   
   //
-  // Get SMM Core Private context in Hob.
+  // Determine if the caller has passed a reference to a SMM_CORE_PRIVATE_DATA
+  // structure in the Hoblist. This choice will govern how boot information is
+  // extracted later.
   //
   GuidHob = GetNextGuidHob (&gSmmCoreDataHobGuid, HobStart);
   if (GuidHob == NULL) {
-    return EFI_UNSUPPORTED;
-  }
-  DataInHob       = GET_GUID_HOB_DATA (GuidHob);
-  gSmmCorePrivate = (SMM_CORE_PRIVATE_DATA *)(UINTN)DataInHob->Address;
+    //
+    // Allocate and zero memory for a SMM_CORE_PRIVATE_DATA table and then
+    // initialise it
+    //
+    gSmmCorePrivate = (SMM_CORE_PRIVATE_DATA *) AllocateRuntimePages(EFI_SIZE_TO_PAGES(sizeof(SMM_CORE_PRIVATE_DATA)));
+    SetMem ((VOID *)(UINTN)gSmmCorePrivate, sizeof(SMM_CORE_PRIVATE_DATA), 0);
+    gSmmCorePrivate->Signature = SMM_CORE_PRIVATE_DATA_SIGNATURE;
+    gSmmCorePrivate->SmmEntryPointRegistered = FALSE;
+    gSmmCorePrivate->InSmm = FALSE;
+    gSmmCorePrivate->ReturnStatus = EFI_SUCCESS;
 
-  {
-    EFI_SMRAM_DESCRIPTOR *SmramRanges;
+    //
+    // Extract the SMRAM ranges from the SMRAM descriptor HOB
+    //
+    SmramRangesHob = GetNextGuidHob (&gEfiSmmPeiSmramMemoryReserveGuid, HobStart);
+    if (SmramRangesHob == NULL)
+      return EFI_UNSUPPORTED;
 
-    DEBUG ((EFI_D_INFO, "SmramRangeCount - 0x%x\n", gSmmCorePrivate->SmramRangeCount));
-    SmramRanges = (EFI_SMRAM_DESCRIPTOR *)(UINTN)gSmmCorePrivate->SmramRanges;
-    for (Index = 0; Index < gSmmCorePrivate->SmramRangeCount; Index++) {
-      DEBUG ((EFI_D_INFO, "SmramRanges[%d]: 0x%016lx - 0x%lx\n", Index, SmramRanges[Index].CpuStart, SmramRanges[Index].PhysicalSize));
-    }
+    SmramRangesHobData = GET_GUID_HOB_DATA (SmramRangesHob);
+    ASSERT (SmramRangesHobData != NULL);
+    SmramRanges = SmramRangesHobData->Descriptor;
+    SmramRangeCount = SmramRangesHobData->NumberOfSmmReservedRegions;
+    ASSERT (SmramRanges);
+    ASSERT (SmramRangeCount);
+
+    //
+    // Copy the SMRAM ranges into SMM_CORE_PRIVATE_DATA table just in case any
+    // code relies on them being present there
+    //
+    gSmmCorePrivate->SmramRangeCount = SmramRangeCount;
+    gSmmCorePrivate->SmramRanges = (EFI_PHYSICAL_ADDRESS)(UINTN)AllocatePool (SmramRangeCount * sizeof(EFI_SMRAM_DESCRIPTOR));
+    ASSERT (gSmmCorePrivate->SmramRanges != 0);
+    CopyMem ((VOID *)(UINTN)gSmmCorePrivate->SmramRanges,
+             SmramRanges,
+             SmramRangeCount * sizeof(EFI_SMRAM_DESCRIPTOR));
+  } else {
+    DataInHob       = GET_GUID_HOB_DATA (GuidHob);
+    gSmmCorePrivate = (SMM_CORE_PRIVATE_DATA *)(UINTN)DataInHob->Address;
+    SmramRanges     = (EFI_SMRAM_DESCRIPTOR *)(UINTN)gSmmCorePrivate->SmramRanges;
+    SmramRangeCount = gSmmCorePrivate->SmramRangeCount;
   }
 
   //
-  // Fill in SMRAM physical address for the SMM Services Table and the SMM Entry Point.
+  // Print the SMRAM ranges passed by the caller
+  //
+  DEBUG ((EFI_D_INFO, "SmramRangeCount - 0x%x\n", SmramRangeCount));
+  for (Index = 0; Index < SmramRangeCount; Index++) {
+          DEBUG ((EFI_D_INFO, "SmramRanges[%d]: 0x%016lx - 0x%lx\n", Index,
+                  SmramRanges[Index].CpuStart,
+                  SmramRanges[Index].PhysicalSize));
+  }
+
+  //
+  // Copy the SMRAM ranges into private SMRAM
+  //
+  mSmramRangeCount = SmramRangeCount;
+  DEBUG ((EFI_D_INFO, "mSmramRangeCount - 0x%x\n", mSmramRangeCount));
+  mSmramRanges = AllocatePool (mSmramRangeCount * sizeof (EFI_SMRAM_DESCRIPTOR));
+  DEBUG ((EFI_D_INFO, "mSmramRanges - 0x%x\n", mSmramRanges));
+  ASSERT (mSmramRanges != NULL);
+  CopyMem (mSmramRanges, (VOID *)(UINTN)SmramRanges, mSmramRangeCount * sizeof (EFI_SMRAM_DESCRIPTOR));
+
   //
   gSmmCorePrivate->Smst          = (EFI_PHYSICAL_ADDRESS)(UINTN)&gSmmCoreSmst;
   gSmmCorePrivate->SmmEntryPoint = (EFI_PHYSICAL_ADDRESS)(UINTN)SmmEntryPoint;
@@ -624,18 +675,6 @@ SmmMainStandalone (
   CopyMem (SmmHobStart, HobStart, HobSize);
   Status = SmmInstallConfigurationTable (&gSmmCoreSmst, &gEfiHobListGuid, SmmHobStart, HobSize);
   ASSERT_EFI_ERROR (Status);
-  
-  //
-  // Copy SmramRanges to SMRAM
-  //
-  mSmramRangeCount = (UINTN)gSmmCorePrivate->SmramRangeCount;
-  DEBUG ((EFI_D_INFO, "mSmramRangeCount - 0x%x\n", mSmramRangeCount));
-  mSmramRanges = AllocatePool (mSmramRangeCount * sizeof (EFI_SMRAM_DESCRIPTOR));
-  DEBUG ((EFI_D_INFO, "mSmramRanges - 0x%x\n", mSmramRanges));
-  ASSERT (mSmramRanges != NULL);
-  CopyMem (mSmramRanges, (VOID *)(UINTN)gSmmCorePrivate->SmramRanges, mSmramRangeCount * sizeof (EFI_SMRAM_DESCRIPTOR));
-  
-  DEBUG ((EFI_D_INFO, "SmiHandlerRegister by SMM Core\n"));
   //
   // Register all SMI Handlers required by the SMM Core
   //
@@ -648,6 +687,7 @@ SmmMainStandalone (
     ASSERT_EFI_ERROR (Status);
   }
   
+
   DEBUG ((EFI_D_INFO, "SmmRegisterProtocolNotify - SmmConfigurationSmmProtocol\n"));
   Status = SmmRegisterProtocolNotify (
              &gEfiSmmConfigurationSmmProtocolGuid,

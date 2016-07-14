@@ -34,6 +34,7 @@
 #include <Guid/HobList.h>
 #include <Guid/SmmUefiInfo.h>
 #include <Guid/SmmFvDispatch.h>
+#include <Guid/SmramMemoryReserve.h>
 
 #include <Library/SmmCoreStandaloneEntryPoint.h>
 #include <Library/BaseLib.h>

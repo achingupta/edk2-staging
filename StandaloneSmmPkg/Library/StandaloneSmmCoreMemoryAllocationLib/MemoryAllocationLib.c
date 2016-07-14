@@ -14,6 +14,7 @@
 
 #include <PiSmm.h>
 
+#include <Guid/SmramMemoryReserve.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -839,27 +840,52 @@ StandaloneSmmCoreMemoryAllocationLibConstructor (
   EFI_HOB_GUID_TYPE               *GuidHob;
   SMM_CORE_DATA_HOB_DATA          *DataInHob;
   VOID                            *HobStart;
-  
+  EFI_SMRAM_HOB_DESCRIPTOR_BLOCK  *SmramRangesHobData;
+  EFI_SMRAM_DESCRIPTOR            *SmramRanges;
+  UINT32                           SmramRangeCount;
+  EFI_HOB_GUID_TYPE               *SmramRangesHob;
+
   HobStart = GetHobList ();
   DEBUG ((EFI_D_INFO, "StandaloneSmmCoreMemoryAllocationLibConstructor - 0x%x\n", HobStart));
-  
+
   //
-  // Get SMM Core Private context in Hob.
+  // Extract SMM Core Private context from the Hob. If absent search for
+  // a Hob containing the SMRAM ranges
   //
   GuidHob = GetNextGuidHob (&gSmmCoreDataHobGuid, HobStart);
   if (GuidHob == NULL) {
-    return EFI_UNSUPPORTED;
+    SmramRangesHob = GetNextGuidHob (&gEfiSmmPeiSmramMemoryReserveGuid, HobStart);
+    if (SmramRangesHob == NULL) {
+      return EFI_UNSUPPORTED;
+    }
+
+    SmramRangesHobData = GET_GUID_HOB_DATA (SmramRangesHob);
+    if (SmramRangesHobData == NULL) {
+      return EFI_UNSUPPORTED;
+    }
+
+    SmramRanges = SmramRangesHobData->Descriptor;
+    if (SmramRanges == NULL) {
+      return EFI_UNSUPPORTED;
+    }
+
+    SmramRangeCount = SmramRangesHobData->NumberOfSmmReservedRegions;
+    if (SmramRanges == NULL) {
+      return EFI_UNSUPPORTED;
+    }
+
+  } else {
+    DataInHob      = GET_GUID_HOB_DATA (GuidHob);
+    SmmCorePrivate = (SMM_CORE_PRIVATE_DATA *)(UINTN)DataInHob->Address;
+    SmramRanges     = (EFI_SMRAM_DESCRIPTOR *)(UINTN)SmmCorePrivate->SmramRanges;
+    SmramRangeCount = SmmCorePrivate->SmramRangeCount;
   }
-  DataInHob       = GET_GUID_HOB_DATA (GuidHob);
-  SmmCorePrivate = (SMM_CORE_PRIVATE_DATA *)(UINTN)DataInHob->Address;
 
   {
     UINTN                Index;
-    EFI_SMRAM_DESCRIPTOR *SmramRanges;
 
-    DEBUG ((EFI_D_INFO, "SmramRangeCount - 0x%x\n", SmmCorePrivate->SmramRangeCount));
-    SmramRanges = (EFI_SMRAM_DESCRIPTOR *)(UINTN)SmmCorePrivate->SmramRanges;
-    for (Index = 0; Index < SmmCorePrivate->SmramRangeCount; Index++) {
+    DEBUG ((EFI_D_INFO, "SmramRangeCount - 0x%x\n", SmramRangeCount));
+    for (Index = 0; Index < SmramRangeCount; Index++) {
       DEBUG ((EFI_D_INFO, "SmramRanges[%d]: 0x%016lx - 0x%016lx\n", Index, SmramRanges[Index].CpuStart, SmramRanges[Index].PhysicalSize));
     }
   }
@@ -868,6 +894,6 @@ StandaloneSmmCoreMemoryAllocationLibConstructor (
   // Initialize memory service using free SMRAM
   //
   DEBUG ((EFI_D_INFO, "SmmInitializeMemoryServices\n"));
-  SmmInitializeMemoryServices ((UINTN)SmmCorePrivate->SmramRangeCount, (VOID *)(UINTN)SmmCorePrivate->SmramRanges);
+  SmmInitializeMemoryServices ((UINTN)SmramRangeCount, (VOID *)(UINTN)SmramRanges);
   return EFI_SUCCESS;
 }

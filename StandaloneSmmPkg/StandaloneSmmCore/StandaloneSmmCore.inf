@@ -42,7 +42,10 @@
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   StandaloneSmmPkg/StandaloneSmmPkg.dec
-  
+
+[Packages.AARCH64]
+  IntelFrameworkPkg/IntelFrameworkPkg.dec	## Definition of EFI_SMRAM_HOB_DESCRIPTOR_BLOCK
+
 [LibraryClasses]
   SmmCoreStandaloneEntryPoint
   BaseLib
@@ -84,4 +87,4 @@
   gEfiEventLegacyBootGuid
   gEfiEventExitBootServicesGuid
   gEfiEventReadyToBootGuid
-
+  gEfiSmmPeiSmramMemoryReserveGuid
