@@ -53,7 +53,9 @@ HobLibConstructor (
     }
   }
 
-  // Do not ASSERT if mHobList is NULL, some function can be used without Initialization.
+  /* HACK: Use the ImageHandle to smuggle the hoblist into the library constructor */
+  if (ImageHandle)
+	  mHobList = (VOID *) ImageHandle;
 
   return EFI_SUCCESS;
 }

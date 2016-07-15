@@ -576,7 +576,7 @@ SmmMainStandalone (
   EFI_HOB_GUID_TYPE               *GuidHob;
   SMM_CORE_DATA_HOB_DATA          *DataInHob;
 
-  ProcessLibraryConstructorList (NULL, &gSmmCoreSmst);
+  ProcessLibraryConstructorList (HobStart, &gSmmCoreSmst);
 
   DEBUG ((EFI_D_INFO, "SmmMain - 0x%x\n", HobStart));
   
