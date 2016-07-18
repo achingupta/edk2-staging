@@ -27,6 +27,7 @@
 #include <Protocol/DebugSupport.h> // for EFI_SYSTEM_CONTEXT
 
 #include <Guid/SmramMemoryReserve.h>
+#include <Guid/MpInformation.h>
 EFI_STATUS
 EFIAPI
 ArmRegisterMmFoundationEntry (
@@ -51,6 +52,8 @@ EFI_HANDLE            mMmCpuHandle = NULL;
 
 // Descriptor with whereabouts of memory used for communication with the normal world
 EFI_SMRAM_DESCRIPTOR  mNsCommBuffer;
+
+MP_INFORMATION_HOB_DATA *mMpInformationHobData;
 
 EFI_MM_CONFIGURATION_PROTOCOL mMmConfig = {
   ArmRegisterMmFoundationEntry
@@ -88,9 +91,11 @@ PiMmCpuStandaloneMmInitialize (
 {
   EFI_SMRAM_HOB_DESCRIPTOR_BLOCK  *SmramRangesHobData;
   EFI_CONFIGURATION_TABLE         *ConfigurationTable;
+  MP_INFORMATION_HOB_DATA         *MpInformationHobData;
   EFI_SMRAM_DESCRIPTOR            *SmramRanges;
   EFI_STATUS                       Status;
   UINT32                           SmramRangeCount;
+  UINT32                           MpInfoSize;
   UINTN                            Index;
   VOID                            *HobStart;
 
@@ -164,6 +169,48 @@ PiMmCpuStandaloneMmInitialize (
   DEBUG ((EFI_D_INFO, "mNsCommBuffer: 0x%016lx - 0x%lx\n",
 	  mNsCommBuffer.CpuStart,
 	  mNsCommBuffer.PhysicalSize));
+
+  //
+  // Extract the MP information from the Hoblist
+  //
+  Status = GetGuidedHobData (HobStart,
+			     &gMpInformationHobGuid,
+			     (VOID **) &MpInformationHobData);
+  if (EFI_ERROR(Status)) {
+    DEBUG ((EFI_D_INFO, "MpInformationHob extraction failed - 0x%x\n", Status));
+    return Status;
+  }
+
+  //
+  // Allocate memory for the MP information and copy over the MP information
+  // passed by Trusted Firmware. Use the number of processors passed in the HOB
+  // to copy the processor information
+  //
+  MpInfoSize = sizeof (MP_INFORMATION_HOB_DATA) +
+	  (sizeof(EFI_PROCESSOR_INFORMATION) *
+	   MpInformationHobData->NumberOfProcessors);
+  Status = mSmst->SmmAllocatePool(EfiRuntimeServicesData,
+				  MpInfoSize,
+				  (void **) &mMpInformationHobData);
+  if (EFI_ERROR(Status)) {
+    DEBUG ((EFI_D_INFO, "mMpInformationHobData mem alloc failed - 0x%x\n", Status));
+    return Status;
+  }
+
+  CopyMem(mMpInformationHobData, MpInformationHobData, MpInfoSize);
+
+  // Print MP information
+  DEBUG ((EFI_D_INFO, "mMpInformationHobData: 0x%016lx - 0x%lx\n",
+	  mMpInformationHobData->NumberOfProcessors,
+	  mMpInformationHobData->NumberOfEnabledProcessors));
+  for (Index = 0; Index < mMpInformationHobData->NumberOfProcessors; Index++) {
+    DEBUG ((EFI_D_INFO, "mMpInformationHobData[0x%lx]: %d, %d, %d\n",
+	    mMpInformationHobData->ProcessorInfoBuffer[Index].ProcessorId,
+	    mMpInformationHobData->ProcessorInfoBuffer[Index].Location.Package,
+	    mMpInformationHobData->ProcessorInfoBuffer[Index].Location.Core,
+	    mMpInformationHobData->ProcessorInfoBuffer[Index].Location.Thread));
+  }
+
 
   return Status;
 }

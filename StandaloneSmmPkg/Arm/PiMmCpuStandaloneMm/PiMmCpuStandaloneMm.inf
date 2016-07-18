@@ -46,6 +46,7 @@
 [Guids]
   gEfiHobListGuid
   gEfiSmmPeiSmramMemoryReserveGuid
+  gMpInformationHobGuid
 
 [Depex]
   TRUE

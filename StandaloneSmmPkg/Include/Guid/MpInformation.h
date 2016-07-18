@@ -30,11 +30,10 @@
 typedef struct {
   UINT64                     NumberOfProcessors;
   UINT64                     NumberOfEnabledProcessors;
-  EFI_PROCESSOR_INFORMATION  ProcessorInfoBuffer[1];
+  EFI_PROCESSOR_INFORMATION  ProcessorInfoBuffer[];
 } MP_INFORMATION_HOB_DATA;
 #pragma pack()
 
 extern EFI_GUID gMpInformationHobGuid;
 
 #endif
-
