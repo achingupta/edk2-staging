@@ -35,6 +35,26 @@ ArmRegisterMmFoundationEntry (
   IN EFI_SMM_ENTRY_POINT                  MmEntryPoint
   );
 
+EFI_STATUS
+EFIAPI
+ArmMmCpuReadSaveState (
+  IN CONST EFI_SMM_CPU_PROTOCOL   *This,
+  IN UINTN                        Width,
+  IN EFI_SMM_SAVE_STATE_REGISTER  Register,
+  IN UINTN                        CpuIndex,
+  OUT VOID                        *Buffer
+  );
+
+EFI_STATUS
+EFIAPI
+ArmMmCpuWriteSaveState (
+  IN CONST EFI_SMM_CPU_PROTOCOL   *This,
+  IN UINTN                        Width,
+  IN EFI_SMM_SAVE_STATE_REGISTER  Register,
+  IN UINTN                        CpuIndex,
+  IN CONST VOID                   *Buffer
+  );
+
 // TODO: Non standard flag defined by ARM TF to mark the SMRAM descriptor that
 // contains the extents of the buffer to be used for communication with the
 // normal world
@@ -57,6 +77,11 @@ MP_INFORMATION_HOB_DATA *mMpInformationHobData;
 
 EFI_MM_CONFIGURATION_PROTOCOL mMmConfig = {
   ArmRegisterMmFoundationEntry
+};
+
+EFI_SMM_CPU_PROTOCOL mMmCpuState = {
+  ArmMmCpuReadSaveState,
+  ArmMmCpuWriteSaveState
 };
 
 EFI_SMM_ENTRY_POINT     mMmEntryPoint = NULL;
@@ -105,6 +130,13 @@ PiMmCpuStandaloneMmInitialize (
   // publish the SMM config protocol so the SMM core can register its entry point
   Status = mSmst->SmmInstallProtocolInterface(&mMmCpuHandle,
     &gEfiMmConfigurationProtocolGuid, EFI_NATIVE_INTERFACE, &mMmConfig);
+  if (EFI_ERROR(Status)) {
+    return Status;
+  }
+
+  // publish the SMM CPU save state protocol
+  Status = mSmst->SmmInstallProtocolInterface(&mMmCpuHandle,
+    &gEfiSmmCpuProtocolGuid, EFI_NATIVE_INTERFACE, &mMmCpuState);
   if (EFI_ERROR(Status)) {
     return Status;
   }
@@ -225,3 +257,30 @@ ArmRegisterMmFoundationEntry(
   mMmEntryPoint = MmEntryPoint;
   return EFI_SUCCESS;
 }
+
+EFI_STATUS
+EFIAPI
+ArmMmCpuReadSaveState(
+  IN CONST EFI_SMM_CPU_PROTOCOL   *This,
+  IN UINTN                        Width,
+  IN EFI_SMM_SAVE_STATE_REGISTER  Register,
+  IN UINTN                        CpuIndex,
+  OUT VOID                        *Buffer
+  ) {
+  // todo: implement
+  return EFI_UNSUPPORTED;
+}
+
+EFI_STATUS
+EFIAPI
+ArmMmCpuWriteSaveState(
+  IN CONST EFI_SMM_CPU_PROTOCOL   *This,
+  IN UINTN                        Width,
+  IN EFI_SMM_SAVE_STATE_REGISTER  Register,
+  IN UINTN                        CpuIndex,
+  IN CONST VOID                   *Buffer
+  ) {
+  // todo: implement
+  return EFI_UNSUPPORTED;
+}
+
