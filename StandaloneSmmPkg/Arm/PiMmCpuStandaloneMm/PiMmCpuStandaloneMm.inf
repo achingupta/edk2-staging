@@ -31,17 +31,21 @@
 [Packages]
   MdePkg/MdePkg.dec
   StandaloneSmmPkg/StandaloneSmmPkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec       ## Definition of EFI_SMRAM_HOB_DESCRIPTOR_BLOCK
 
 [LibraryClasses]
   StandaloneSmmDriverEntryPoint
   DebugLib
   BaseMemoryLib
+  HobLib
 
 [Protocols]
   gEfiMmConfigurationProtocolGuid		# PROTOCOL ALWAYS_PRODUCED
   gEfiSmmCpuProtocolGuid                	# PROTOCOL ALWAYS_PRODUCED
 
 [Guids]
+  gEfiHobListGuid
+  gEfiSmmPeiSmramMemoryReserveGuid
 
 [Depex]
   TRUE
