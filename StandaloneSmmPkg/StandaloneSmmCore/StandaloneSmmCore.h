@@ -26,6 +26,7 @@
 #include <Protocol/LoadedImage.h>
 #include <Protocol/SmmConfigurationSmm.h>
 #include <Protocol/MmConfiguration.h>
+#include <Protocol/MmGuidedEventManagement.h>
 
 #include <Guid/Apriori.h>
 #include <Guid/EventGroup.h>

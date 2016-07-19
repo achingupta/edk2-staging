@@ -68,6 +68,7 @@
 
 [Protocols.AARCH64]
   gEfiMmConfigurationProtocolGuid               ## CONSUMES
+  gEfiMmGuidedEventManagementProtocolGuid
 
 [Pcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdLoadFixAddressSmmCodePageNumber     ## SOMETIMES_CONSUMES

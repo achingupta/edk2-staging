@@ -97,7 +97,7 @@ SMM_CORE_SMI_HANDLERS  mSmmCoreSmiHandlers[] = {
 };
 
 EFI_SYSTEM_TABLE                *mEfiSystemTable;
-
+EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *MmGuidedEventMgmt;
 UINTN                           mSmramRangeCount;
 EFI_SMRAM_DESCRIPTOR            *mSmramRanges;
 
@@ -414,15 +414,46 @@ SmmEntryPoint (
 {
   EFI_STATUS                  Status;
   EFI_SMM_COMMUNICATE_HEADER  *CommunicateHeader;
+  UINTN                       CommBufferSize;
   BOOLEAN                     InLegacyBoot;
 
-  //DEBUG ((EFI_D_INFO, "SmmEntryPoint ...\n"));
+
+  DEBUG ((EFI_D_INFO, "SmmEntryPoint ...\n"));
 
   //
   // Update SMST using the context
   //
   CopyMem (&gSmmCoreSmst.SmmStartupThisAp, SmmEntryContext, sizeof (EFI_SMM_ENTRY_CONTEXT));
 
+  if (!MmGuidedEventMgmt)
+    goto traditional;
+
+  //
+  // Try using the ARM Guided Event protocol first
+  //
+  Status = MmGuidedEventMgmt->GuidedEventGetContext(MmGuidedEventMgmt,
+						    SmmEntryContext->CurrentlyExecutingCpu,
+                                                    (VOID *) &CommunicateHeader,
+                                                    &CommBufferSize);
+  if (Status != EFI_SUCCESS) {
+    DEBUG ((EFI_D_WARN, "Unable to obtain Guided Event context\n"));
+    goto traditional;
+  }
+
+  DEBUG ((EFI_D_INFO, "CommunicateHeader - 0x%x, CommBufferSize - 0x%x\n",
+          CommunicateHeader, CommBufferSize));
+
+  Status = SmiManage(&CommunicateHeader->HeaderGuid,
+                     NULL,
+                     CommunicateHeader->Data,
+                     &CommBufferSize);
+  if (Status != EFI_SUCCESS) {
+    DEBUG ((EFI_D_WARN, "Unable to manage Guided Event\n"));
+    goto traditional;
+  }
+
+  goto exit;
+traditional:
   //
   // Do not use private data structure
   //
@@ -490,8 +521,9 @@ SmmEntryPoint (
     //
     gSmmCorePrivate->InSmm = FALSE;
   }
-  
-  //DEBUG ((EFI_D_INFO, "SmmEntryPoint Done\n"));
+
+exit:
+  DEBUG ((EFI_D_INFO, "SmmEntryPoint Done\n"));
 }
 
 EFI_STATUS

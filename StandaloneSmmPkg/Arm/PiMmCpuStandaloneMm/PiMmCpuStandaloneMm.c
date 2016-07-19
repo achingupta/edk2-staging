@@ -89,6 +89,7 @@ ArmMmCpuWriteSaveState (
 
 extern EFI_STATUS _PiMmCpuStandaloneMmEntryPoint (
   IN UINTN EventId,
+  IN UINTN CpuNumber,
   IN UINTN NsCommBufferAddr
   );
 
@@ -198,10 +199,96 @@ EFI_SMM_ENTRY_POINT     mMmEntryPoint = NULL;
 EFI_STATUS
 PiMmCpuStandaloneMmEntryPoint (
   IN UINTN EventId,
+  IN UINTN CpuNumber,
   IN UINTN NsCommBufferAddr
   )
 {
-  return EFI_SUCCESS;
+  EFI_SMM_COMMUNICATE_HEADER *GuidedEventContext = NULL;
+  EFI_SMM_ENTRY_CONTEXT       MmEntryPointContext = {0};
+  EFI_STATUS                  Status;
+  BOOLEAN                     UniqueGuidedEvent = FALSE;
+  UINTN                       NsCommBufferSize;
+
+  DEBUG ((EFI_D_INFO, "Received event - 0x%x on cpu %d\n", EventId, CpuNumber));
+
+  // Check whether any handler for this event has been registered
+  if (!EventIdInfo[EventId].HandlerCount)
+    return EFI_INVALID_PARAMETER;
+
+  // Check if this event corresponds to a single Guided handler or has multiple
+  // handlers registered.
+  // TODO: Remove assumptions that:
+  //       1. events with a 1:1 mapping to a GUID do not have arguments that
+  //          need to be copied into this translation regime.
+  //       2. events with a 1:N mapping with GUIDs always have a buffer address
+  //          and size in X1 and X2
+  if (EventIdToGuidLookupTable)
+    UniqueGuidedEvent = !CompareGuid(&EventIdToGuidLookupTable[EventId], &gZeroGuid);
+
+  if (UniqueGuidedEvent) {
+    // Found a GUID, allocate memory to populate a communication buffer
+    // with the GUID in it
+    Status = mSmst->SmmAllocatePool(EfiRuntimeServicesData, sizeof(EFI_SMM_COMMUNICATE_HEADER), (VOID **) &GuidedEventContext);
+    if (Status != EFI_SUCCESS) {
+      DEBUG ((EFI_D_INFO, "Mem alloc failed - 0x%x\n", EventId));
+      return Status;
+    }
+
+    // Copy the GUID
+    CopyGuid(&GuidedEventContext->HeaderGuid, &EventIdToGuidLookupTable[EventId]);
+
+    // Message Length is 0 'cause of the assumption mentioned above
+    GuidedEventContext->MessageLength = 0;
+  } else {
+    // TODO: Perform parameter validation of NsCommBufferAddr
+
+    // This event id is the parent of multiple GUIDed handlers. Retrieve
+    // the specific GUID from the communication buffer passed by the
+    // caller.
+
+    if (NsCommBufferAddr && (NsCommBufferAddr < mNsCommBuffer.PhysicalStart))
+      return EFI_INVALID_PARAMETER;
+
+    // Find out the size of the buffer passed
+    NsCommBufferSize = ((EFI_SMM_COMMUNICATE_HEADER *) NsCommBufferAddr)->MessageLength;
+
+    // Alternative approach in case EL3 has preallocated the non-secure
+    // buffer. MM Foundation is told about the buffer through the Hoblist
+    // and is responsible for performing the bounds check.
+    if (NsCommBufferAddr + NsCommBufferSize >=
+      mNsCommBuffer.PhysicalStart + mNsCommBuffer.PhysicalSize)
+        return EFI_INVALID_PARAMETER;
+
+
+    // Now that the secure world can see the normal world buffer, allocate
+    // memory to copy the communication buffer to the secure world.
+    Status = mSmst->SmmAllocatePool(EfiRuntimeServicesData, NsCommBufferSize, (VOID **) &GuidedEventContext);
+    if (Status != EFI_SUCCESS) {
+      DEBUG ((EFI_D_INFO, "Mem alloc failed - 0x%x\n", EventId));
+      // TODO: Unmap secure memory before exiting to the normal world
+      return Status;
+    }
+
+    // X1 contains the VA of the normal world memory accessible from
+    // S-EL0
+    CopyMem(GuidedEventContext, (CONST VOID *) NsCommBufferAddr, NsCommBufferSize);
+  }
+
+  // Stash the pointer to the allocated Event Context for this CPU
+  PerCpuGuidedEventContext[CpuNumber] = GuidedEventContext;
+
+  // TODO: Populate entire entry point context with valid information
+  MmEntryPointContext.CurrentlyExecutingCpu = CpuNumber;
+  MmEntryPointContext.NumberOfCpus = mMpInformationHobData->NumberOfProcessors;
+  mMmEntryPoint(&MmEntryPointContext);
+
+  // Free the memory allocation done earlier and reset the per-cpu context
+  // TODO: Check for the return status of the FreePool API
+  ASSERT (GuidedEventContext);
+  mSmst->SmmFreePool((VOID *) GuidedEventContext);
+  PerCpuGuidedEventContext[CpuNumber] = NULL;
+
+  return Status;
 }
 
 EFI_STATUS
