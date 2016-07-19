@@ -16,10 +16,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <PiSmm.h>
 
 
+#include <Library/ArmSvcLib.h>
 #include <Library/SmmCoreStandaloneEntryPoint.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseLib.h>
-
+#include <IndustryStandard/ArmStdSmc.h>
 //
 // Cache copy of HobList pointer. 
 // 
@@ -43,6 +44,8 @@ _ModuleEntryPoint (
   IN VOID  *HobStart
   )
 {
+  ARM_SVC_ARGS InitMmFoundationSvcArgs = {0};
+
   //
   // Cache a pointer to the HobList
   //
@@ -52,6 +55,10 @@ _ModuleEntryPoint (
   // Call the SMM Core entry point
   //
   ProcessModuleEntryPointList (HobStart);
+
+  InitMmFoundationSvcArgs.Arg0 = ARM_SMC_ID_MM_INIT_COMPLETE_AARCH64;
+  InitMmFoundationSvcArgs.Arg1 = 0;
+  ArmCallSvc(&InitMmFoundationSvcArgs);
 }
 
 

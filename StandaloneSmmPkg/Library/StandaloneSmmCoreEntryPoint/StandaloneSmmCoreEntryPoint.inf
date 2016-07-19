@@ -34,7 +34,12 @@
   MdePkg/MdePkg.dec
   StandaloneSmmPkg/StandaloneSmmPkg.dec
 
+[Packages.AARCH64]
+  ArmPkg/ArmPkg.dec
+
 [LibraryClasses]
   BaseLib
   DebugLib
 
+[LibraryClasses.AARCH64]
+  ArmSvcLib
