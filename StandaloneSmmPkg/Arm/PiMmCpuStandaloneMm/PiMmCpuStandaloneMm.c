@@ -32,6 +32,7 @@
 #include <Guid/ZeroGuid.h>
 #include <Guid/SmramMemoryReserve.h>
 #include <Guid/MpInformation.h>
+#include <Guid/SmmUefiInfo.h>
 
 #include <IndustryStandard/ArmStdSmc.h>
 
@@ -138,7 +139,12 @@ typedef struct {
 // supported by this platform. There can be a many to one relationship between
 // GUIDs and event ids.
 //
-GUID_TO_EVENT_ID_ENTRY *GuidToEventIdLookupTable;
+const GUID_TO_EVENT_ID_ENTRY GuidToEventIdLookupTable[] = {
+  {
+    .Guid = SMM_UEFI_INFO_GUID,
+    .EventId = EVENT_ID_MM_COMMUNICATE_SMC
+  }
+};
 
 //
 // On ARM platforms every event is expected to have a GUID associated with

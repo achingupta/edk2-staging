@@ -86,6 +86,7 @@ BOOLEAN  mInLegacyBoot = FALSE;
 //
 SMM_CORE_SMI_HANDLERS  mSmmCoreSmiHandlers[] = {
   { SmmUefiInfoHandler,       &gSmmUefiInfoGuid,                  NULL, TRUE  },
+#if 0
   { SmmFvDispatchHandler,     &gSmmFvDispatchGuid,                NULL, TRUE  },
   { SmmDriverDispatchHandler, &gEfiEventDxeDispatchGuid,          NULL, TRUE  },
   { SmmReadyToLockHandler,    &gEfiDxeSmmReadyToLockProtocolGuid, NULL, TRUE  }, 
@@ -93,6 +94,7 @@ SMM_CORE_SMI_HANDLERS  mSmmCoreSmiHandlers[] = {
   { SmmLegacyBootHandler,     &gEfiEventLegacyBootGuid,           NULL, FALSE },
   { SmmExitBootServiceHandler,&gEfiEventExitBootServicesGuid,     NULL, FALSE },
   { SmmReadyToBootHandler,    &gEfiEventReadyToBootGuid,          NULL, FALSE },
+#endif
   { NULL,                     NULL,                               NULL, FALSE },
 };
 
@@ -528,6 +530,35 @@ exit:
 
 EFI_STATUS
 EFIAPI
+MmGuidedEventMgmtNotify (
+  IN CONST EFI_GUID *Protocol,
+  IN VOID           *Interface,
+  IN EFI_HANDLE     Handle
+  )
+{
+  EFI_STATUS                               Status;
+  UINTN                                    Index;
+
+  DEBUG ((EFI_D_INFO, "SmiHandlerRegister by SMM Core\n"));
+
+  MmGuidedEventMgmt = Interface;
+
+  //
+  // Register all SMI Handlers required by the SMM Core
+  //
+  for (Index = 0; mSmmCoreSmiHandlers[Index].HandlerType != NULL; Index++) {
+    Status =  MmGuidedEventMgmt->GuidedEventHandlerRegister(MmGuidedEventMgmt,
+							    mSmmCoreSmiHandlers[Index].Handler,
+							    mSmmCoreSmiHandlers[Index].HandlerType,
+							    &mSmmCoreSmiHandlers[Index].DispatchHandle);
+    ASSERT_EFI_ERROR (Status);
+  }
+
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
 SmmConfigurationSmmNotify (
   IN CONST EFI_GUID *Protocol,
   IN VOID           *Interface,
@@ -751,18 +782,6 @@ SmmMainStandalone (
   CopyMem (SmmHobStart, HobStart, HobSize);
   Status = SmmInstallConfigurationTable (&gSmmCoreSmst, &gEfiHobListGuid, SmmHobStart, HobSize);
   ASSERT_EFI_ERROR (Status);
-  //
-  // Register all SMI Handlers required by the SMM Core
-  //
-  for (Index = 0; mSmmCoreSmiHandlers[Index].HandlerType != NULL; Index++) {
-    Status = SmiHandlerRegister (
-               mSmmCoreSmiHandlers[Index].Handler,
-               mSmmCoreSmiHandlers[Index].HandlerType,
-               &mSmmCoreSmiHandlers[Index].DispatchHandle
-               );
-    ASSERT_EFI_ERROR (Status);
-  }
-  
 
   DEBUG ((EFI_D_INFO, "SmmRegisterProtocolNotify - SmmConfigurationSmmProtocol\n"));
   Status = SmmRegisterProtocolNotify (
@@ -770,6 +789,14 @@ SmmMainStandalone (
              SmmConfigurationSmmNotify,
              &Registration
              );
+  ASSERT_EFI_ERROR (Status);
+
+  DEBUG ((EFI_D_INFO, "SmmRegisterProtocolNotify - MmGuidedEventManagementProtocol\n"));
+  Status = SmmRegisterProtocolNotify (
+          &gEfiMmGuidedEventManagementProtocolGuid,
+          MmGuidedEventMgmtNotify,
+          &Registration
+          );
   ASSERT_EFI_ERROR (Status);
 
   //
