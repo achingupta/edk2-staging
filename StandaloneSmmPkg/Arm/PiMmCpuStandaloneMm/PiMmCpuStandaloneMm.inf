@@ -27,25 +27,31 @@
 
 [Sources]
   PiMmCpuStandaloneMm.c
+  PiMmCpuStandaloneMmEntry.S
 
 [Packages]
+  ArmPkg/ArmPkg.dec
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
   StandaloneSmmPkg/StandaloneSmmPkg.dec
   IntelFrameworkPkg/IntelFrameworkPkg.dec       ## Definition of EFI_SMRAM_HOB_DESCRIPTOR_BLOCK
 
 [LibraryClasses]
   StandaloneSmmDriverEntryPoint
   DebugLib
+  ArmSvcLib
   BaseMemoryLib
   HobLib
 
 [Protocols]
   gEfiMmConfigurationProtocolGuid		# PROTOCOL ALWAYS_PRODUCED
+  gEfiMmGuidedEventManagementProtocolGuid       # PROTOCOL ALWAYS_PRODUCED
   gEfiSmmCpuProtocolGuid                	# PROTOCOL ALWAYS_PRODUCED
 
 [Guids]
   gEfiHobListGuid
   gEfiSmmPeiSmramMemoryReserveGuid
+  gZeroGuid
   gMpInformationHobGuid
 
 [Depex]

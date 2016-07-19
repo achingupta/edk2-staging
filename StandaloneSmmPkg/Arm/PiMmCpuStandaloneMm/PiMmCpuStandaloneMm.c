@@ -19,15 +19,47 @@
 #include <Pi/PiSmmCis.h>
 
 #include <Library/DebugLib.h>
+#include <Library/ArmSvcLib.h>
+#include <Library/ArmLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/HobLib.h>
 
 #include <Protocol/MmConfiguration.h>
+#include <Protocol/MmGuidedEventManagement.h>
 #include <Protocol/SmmCpu.h>
 #include <Protocol/DebugSupport.h> // for EFI_SYSTEM_CONTEXT
 
+#include <Guid/ZeroGuid.h>
 #include <Guid/SmramMemoryReserve.h>
 #include <Guid/MpInformation.h>
+
+#include <IndustryStandard/ArmStdSmc.h>
+
+EFI_STATUS
+EFIAPI
+ArmMmiHandlerRegister(
+  IN  CONST EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *This,
+  IN  EFI_SMM_HANDLER_ENTRY_POINT2                   Handler,
+  IN  CONST EFI_GUID                                *HandlerType  OPTIONAL,
+  OUT EFI_HANDLE                                    *DispatchHandle
+  );
+
+EFI_STATUS
+EFIAPI
+ArmMmiHandlerUnRegister(
+  IN  CONST EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *This,
+  IN  CONST EFI_GUID                                *HandlerType  OPTIONAL,
+  IN  EFI_HANDLE                                    *DispatchHandle
+  );
+
+EFI_STATUS
+EFIAPI
+ArmMmiGetContext(
+  IN  CONST EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *This,
+  IN  UINTN                                         CpuNumber,
+  OUT  VOID                                         **CommBuffer,
+  OUT  UINTN                                        *CommBufferSize
+  );
 EFI_STATUS
 EFIAPI
 ArmRegisterMmFoundationEntry (
@@ -55,10 +87,81 @@ ArmMmCpuWriteSaveState (
   IN CONST VOID                   *Buffer
   );
 
+extern EFI_STATUS _PiMmCpuStandaloneMmEntryPoint (
+  IN UINTN EventId,
+  IN UINTN NsCommBufferAddr
+  );
+
 // TODO: Non standard flag defined by ARM TF to mark the SMRAM descriptor that
 // contains the extents of the buffer to be used for communication with the
 // normal world
 #define EFI_SECURE_NS_MEM             0x00000080
+
+//
+// Many GUIDed events within the MM environment can correspond to a single Event
+// ID within the ARM Trusted Firmware environment. EVENT_ID_INFO keeps track of
+// the number of GUIDed event handlers registered for a particular ARM TF Event.
+//
+// TODO:
+//      1. This infomation could be maintained in the platform component of MM.
+//      2. Also, a flags field could be added to provide more information about
+//         the event e.g. the parameters are populated in GP registers (assumed
+//         currently), system registers or system memory.
+//      3. Events could local to a CPU or global. More thought is needed around
+//         this. Currently in the event ID, bits[3:0] contain the ID and bit[4]
+//         when set indicates a global event.
+//
+#define EVENT_ID_MM_COMMUNICATE_SMC	0x10
+
+typedef struct {
+  UINT16   HandlerCount;
+} EVENT_ID_INFO;
+
+EVENT_ID_INFO EventIdInfo[] = {
+  [EVENT_ID_MM_COMMUNICATE_SMC] = {0}
+};
+
+//
+// GUID_TO_EVENT_ID_ENTRY is used to construct a lookup table. This is used at
+// the time of registration of GUIDed handlers to lookup the corresponding
+// event.
+//
+typedef struct {
+  EFI_GUID Guid;
+  UINTN    EventId;
+} GUID_TO_EVENT_ID_ENTRY;
+
+
+//
+// Table that contains and entry for every GUID and its corresponding event id
+// supported by this platform. There can be a many to one relationship between
+// GUIDs and event ids.
+//
+GUID_TO_EVENT_ID_ENTRY *GuidToEventIdLookupTable;
+
+//
+// On ARM platforms every event is expected to have a GUID associated with
+// it. It will be used by the MM Entry point to find the handler for the
+// event. It will either be populated in a EFI_SMM_COMMUNICATE_HEADER by the
+// caller of the event (e.g. MM_COMMUNICATE SMC) or by the CPU driver
+// (e.g. during an asynchronous event). In either case, this context is
+// maintained in an array which has an entry for each CPU. The pointer to this
+// array is held in PerCpuGuidedEventContext. Memory is allocated once the
+// number of CPUs in the system are made known through the
+// MP_INFORMATION_HOB_DATA.
+//
+EFI_SMM_COMMUNICATE_HEADER **PerCpuGuidedEventContext = NULL;
+
+//
+// When an event is received by the CPU driver, it could correspond to a unique
+// GUID (e.g. interrupt events) or to multiple GUIDs (e.g. MM_COMMUNICATE
+// SMC). A table is used by the CPU driver to find the GUID corresponding to the
+// event id in case there is a 1:1 mapping between the two. If an event id has
+// multiple GUIDs associated with it then such an entry will not be found in
+// this table.
+//
+// TODO: Currently NULL since there are no asynchronous events
+EFI_GUID *EventIdToGuidLookupTable = NULL;
 
 //
 // Private copy of the MM system table for future use
@@ -84,7 +187,22 @@ EFI_SMM_CPU_PROTOCOL mMmCpuState = {
   ArmMmCpuWriteSaveState
 };
 
+EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL mMmGuidedEventMgmt = {
+  ArmMmiHandlerRegister,
+  ArmMmiHandlerUnRegister,
+  ArmMmiGetContext
+};
+
 EFI_SMM_ENTRY_POINT     mMmEntryPoint = NULL;
+
+EFI_STATUS
+PiMmCpuStandaloneMmEntryPoint (
+  IN UINTN EventId,
+  IN UINTN NsCommBufferAddr
+  )
+{
+  return EFI_SUCCESS;
+}
 
 EFI_STATUS
 GetGuidedHobData (
@@ -122,6 +240,7 @@ PiMmCpuStandaloneMmInitialize (
   UINT32                           SmramRangeCount;
   UINT32                           MpInfoSize;
   UINTN                            Index;
+  UINTN                            ArraySize;
   VOID                            *HobStart;
 
   ASSERT (SystemTable != NULL);
@@ -137,6 +256,13 @@ PiMmCpuStandaloneMmInitialize (
   // publish the SMM CPU save state protocol
   Status = mSmst->SmmInstallProtocolInterface(&mMmCpuHandle,
     &gEfiSmmCpuProtocolGuid, EFI_NATIVE_INTERFACE, &mMmCpuState);
+  if (EFI_ERROR(Status)) {
+    return Status;
+  }
+
+  // publish the MM Guided event management protocol
+  Status = mSmst->SmmInstallProtocolInterface(&mMmCpuHandle,
+    &gEfiMmGuidedEventManagementProtocolGuid, EFI_NATIVE_INTERFACE, &mMmGuidedEventMgmt);
   if (EFI_ERROR(Status)) {
     return Status;
   }
@@ -243,8 +369,168 @@ PiMmCpuStandaloneMmInitialize (
 	    mMpInformationHobData->ProcessorInfoBuffer[Index].Location.Thread));
   }
 
-
+  //
+  // Allocate memory for a table to hold pointers to a
+  // EFI_SMM_COMMUNICATE_HEADER for each CPU
+  //
+  ArraySize = sizeof(EFI_SMM_COMMUNICATE_HEADER *) *
+	  mMpInformationHobData->NumberOfEnabledProcessors;
+  Status = mSmst->SmmAllocatePool(EfiRuntimeServicesData,
+				  ArraySize,
+				  (VOID **) &PerCpuGuidedEventContext);
+  if (EFI_ERROR(Status)) {
+    DEBUG ((EFI_D_INFO, "PerCpuGuidedEventContext mem alloc failed - 0x%x\n", Status));
+    return Status;
+  }
   return Status;
+}
+
+EFI_STATUS
+FindEventIdFromGuid(
+  IN  CONST EFI_GUID                                *Guid,
+  OUT UINTN                                         *EventId
+  ) {
+  UINTN Ctr;
+
+  if (NULL == Guid || NULL == EventId)
+    return EFI_INVALID_PARAMETER;
+
+  if (NULL == GuidToEventIdLookupTable)
+    return EFI_NOT_FOUND;
+
+  for (Ctr = 0; Ctr < ARRAY_SIZE(GuidToEventIdLookupTable); Ctr++)
+     if (CompareGuid(Guid, &GuidToEventIdLookupTable[Ctr].Guid)) {
+       *EventId = GuidToEventIdLookupTable[Ctr].EventId;
+       return EFI_SUCCESS;
+     }
+  return EFI_NOT_FOUND;
+}
+
+EFI_STATUS
+ValidateAndFindEventIdFromGuid(
+  IN  CONST EFI_GUID                                *Guid,
+  OUT UINTN                                         *EventId
+  ) {
+  // Check if a GUID has been provided by the caller
+  if (NULL == Guid)
+    return EFI_INVALID_PARAMETER;
+
+  // Check if a valid GUID has been provided by the caller
+  if (CompareGuid(Guid, &gZeroGuid))
+    return EFI_INVALID_PARAMETER;
+
+  // Find the event id corresponding to this GUID
+  return FindEventIdFromGuid(Guid, EventId);
+}
+
+EFI_STATUS
+EFIAPI
+ArmMmiHandlerRegister(
+  IN  CONST EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *This,
+  IN  EFI_SMM_HANDLER_ENTRY_POINT2                   Handler,
+  IN  CONST EFI_GUID                                *HandlerType,
+  OUT EFI_HANDLE                                    *DispatchHandle
+  ) {
+  EFI_STATUS Status = EFI_SUCCESS;
+  UINTN EventId;
+  ARM_SVC_ARGS RegisterEventSvcArgs = {0};
+
+  // Find the event id corresponding to this GUID
+  Status = ValidateAndFindEventIdFromGuid(HandlerType, &EventId);
+  if (Status != EFI_SUCCESS)
+    return Status;
+
+  DEBUG ((EFI_D_INFO, "ArmMmiHandlerRegister - GUID %g, Handler - 0x%x, Event ID - %d\n",
+	  HandlerType,
+	  Handler,
+	  EventId));
+
+  //
+  // Register the handler with the main MM dispatcher. Bail out in case of an
+  // error
+  //
+  Status = mSmst->SmiHandlerRegister(Handler, HandlerType, DispatchHandle);
+  if (Status != EFI_SUCCESS)
+    return Status;
+
+  // Check if the event has already been registered with EL3 else do so
+  if (!EventIdInfo[EventId].HandlerCount) {
+
+    // Prepare arguments to register and enable this event at EL3 and
+    // check if the GUID corresponds to an event that can be registered
+    RegisterEventSvcArgs.Arg0 = ARM_SMC_ID_MM_EVENT_REGISTER_AARCH64;
+    RegisterEventSvcArgs.Arg1 = EventId;
+    RegisterEventSvcArgs.Arg2 = (UINTN) _PiMmCpuStandaloneMmEntryPoint;
+
+    ArmCallSvc(&RegisterEventSvcArgs);
+    if (RegisterEventSvcArgs.Arg0 != EFI_SUCCESS) {
+      Status = mSmst->SmiHandlerUnRegister(DispatchHandle);
+      ASSERT (Status == EFI_SUCCESS);
+      return EFI_INVALID_PARAMETER;
+    }
+  }
+
+  EventIdInfo[EventId].HandlerCount++;
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
+ArmMmiHandlerUnRegister(
+  IN  CONST EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *This,
+  IN  CONST EFI_GUID                                *HandlerType,
+  IN  EFI_HANDLE                                    *DispatchHandle
+  ) {
+  EFI_STATUS Status = EFI_SUCCESS;
+  UINTN EventId;
+  ARM_SVC_ARGS UnRegisterEventSvcArgs = {0};
+
+  // Find the event id corresponding to this GUID
+  Status = ValidateAndFindEventIdFromGuid(HandlerType, &EventId);
+  if (Status != EFI_SUCCESS)
+    return Status;
+
+  // Check if there is a handler registered for this Guided event. Decrement the
+  // handler counter if so. Else, this is an attempt to unregister a handler
+  // that was never registered.
+  if (!EventIdInfo[EventId].HandlerCount)
+    return EFI_INVALID_PARAMETER;
+
+  EventIdInfo[EventId].HandlerCount--;
+
+  // If the event has a 0 handler count then it has to be unregistered at EL3
+  if (!EventIdInfo[EventId].HandlerCount) {
+    UnRegisterEventSvcArgs.Arg0 = ARM_SMC_ID_MM_EVENT_UNREGISTER_AARCH64;
+    UnRegisterEventSvcArgs.Arg1 = EventId;
+    ArmCallSvc(&UnRegisterEventSvcArgs);
+    ASSERT (UnRegisterEventSvcArgs.Arg0 == EFI_SUCCESS);
+  }
+
+  //
+  // UnRegister the handler with the main MM dispatcher. Bail out in case of an
+  // error
+  //
+  return mSmst->SmiHandlerUnRegister(DispatchHandle);
+}
+
+EFI_STATUS
+EFIAPI
+ArmMmiGetContext(
+  IN  CONST EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *This,
+  IN  UINTN                                         CpuNumber,
+  OUT  VOID                                         **CommBuffer,
+  OUT  UINTN                                        *CommBufferSize
+  ) {
+  if (!CommBufferSize || !CommBuffer)
+    return EFI_INVALID_PARAMETER;
+
+  if (!PerCpuGuidedEventContext[CpuNumber])
+    return EFI_NOT_FOUND;
+
+  *CommBuffer = PerCpuGuidedEventContext[CpuNumber];
+  *CommBufferSize = PerCpuGuidedEventContext[CpuNumber]->MessageLength;
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -283,4 +569,3 @@ ArmMmCpuWriteSaveState(
   // todo: implement
   return EFI_UNSUPPORTED;
 }
-
