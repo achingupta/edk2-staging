@@ -1,6 +1,6 @@
 /** @file
 *
-*  Copyright (c) 2012-2014, ARM Limited. All rights reserved.
+*  Copyright (c) 2012-2016, ARM Limited. All rights reserved.
 *
 *  This program and the accompanying materials
 *  are licensed and made available under the terms and conditions of the BSD License
@@ -39,6 +39,38 @@
  */
 #define ARM_SMC_STD_REVISION_MAJOR    0x0
 #define ARM_SMC_STD_REVISION_MINOR    0x1
+
+
+/*
+ * Management Mode (MM) calls cover a subset of the Standard Service Call range.
+ * The list below is not exhaustive.
+ */
+#define ARM_SMC_ID_MM_COMMUNICATE_AARCH32          0x84000040
+#define ARM_SMC_ID_MM_EVENT_REGISTER_AARCH32       0x84000041
+#define ARM_SMC_ID_MM_EVENT_UNREGISTER_AARCH32     0x84000042
+#define ARM_SMC_ID_MM_EVENT_GET_CONTEXT_AARCH32    0x84000043
+#define ARM_SMC_ID_MM_EVENT_MAP_MEMORY_AARCH32     0x84000044
+#define ARM_SMC_ID_MM_EVENT_UNMAP_MEMORY_AARCH32   0x84000045
+#define ARM_SMC_ID_MM_EVENT_COMPLETE_AARCH32       0x84000046
+#define ARM_SMC_ID_MM_INIT_COMPLETE_AARCH32        0x84000047
+#define ARM_SMC_ID_MM_GET_NS_BUFFER_AARCH32        0x84000048
+
+#define ARM_SMC_ID_MM_COMMUNICATE_AARCH64          0xC4000040    // Request service from secure standalone MM environment
+#define ARM_SMC_ID_MM_EVENT_REGISTER_AARCH64       0xC4000041    // Register secure standalone MM event handler with privileged secure EL
+#define ARM_SMC_ID_MM_EVENT_UNREGISTER_AARCH64     0xC4000042    // Unegister secure standalone MM event handler with privileged secure EL
+#define ARM_SMC_ID_MM_EVENT_GET_CONTEXT_AARCH64    0xC4000043    // Request context information for MM event from privileged secure EL
+#define ARM_SMC_ID_MM_EVENT_MAP_MEMORY_AARCH64     0xC4000044    // Request privileged secure EL to map memory range
+#define ARM_SMC_ID_MM_EVENT_UNMAP_MEMORY_AARCH64   0xC4000045    // Request privileged secure EL to unmap memory range
+#define ARM_SMC_ID_MM_EVENT_COMPLETE_AARCH64       0xC4000046    // Signal completion of MM event handling to privileged secure EL
+#define ARM_SMC_ID_MM_INIT_COMPLETE_AARCH64        0xC4000047    // Signal completion of MM Foundation initialisation to privileged secure EL
+#define ARM_SMC_ID_MM_GET_NS_BUFFER_AARCH64        0xC4000048    // Request extents of buffer for communication with secure MM environment
+
+/* MM return error codes */
+#define ARM_SMC_MM_RET_SUCCESS	            0
+#define ARM_SMC_MM_RET_NOT_SUPPORTED       -1
+#define ARM_SMC_MM_RET_INVALID_PARAMS      -2
+#define ARM_SMC_MM_RET_DENIED              -3
+#define ARM_SMC_MM_RET_NO_MEMORY           -4	// TODO: Add this to the SMCCC spec.
 
 /*
  * Power State Coordination Interface (PSCI) calls cover a subset of the
