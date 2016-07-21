@@ -1,0 +1,47 @@
+#/** @file
+#
+#  Standalone MM CPU driver for ARM Standard Platforms
+#
+#  Copyright (c) 2009, Apple Inc. All rights reserved.<BR>
+#  Copyright (c) 2016 HP Development Company, L.P.
+#  Copyright (c) 2016, ARM Limited. All rights reserved.
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#**/
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = ArmPiMmCpuStandaloneMm
+  FILE_GUID                      = 58F7A62B-6280-42A7-BC38-10535A64A92C
+  MODULE_TYPE                    = SMM_STANDALONE
+  VERSION_STRING                 = 1.0
+  PI_SPECIFICATION_VERSION       = 0x0001000A
+  ENTRY_POINT                    = PiMmCpuStandaloneMmInitialize
+
+[Sources]
+  PiMmCpuStandaloneMm.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  StandaloneSmmPkg/StandaloneSmmPkg.dec
+
+[LibraryClasses]
+  StandaloneSmmDriverEntryPoint
+  DebugLib
+  BaseMemoryLib
+
+[Protocols]
+  gEfiMmConfigurationProtocolGuid		# PROTOCOL ALWAYS_PRODUCED
+  gEfiSmmCpuProtocolGuid                	# PROTOCOL ALWAYS_PRODUCED
+
+[Guids]
+
+[Depex]
+  TRUE

@@ -528,6 +528,40 @@ SmmConfigurationSmmNotify (
   return EFI_SUCCESS;
 }
 
+EFI_STATUS
+EFIAPI
+MmConfigurationMmNotify (
+  IN CONST EFI_GUID *Protocol,
+  IN VOID           *Interface,
+  IN EFI_HANDLE      Handle
+  )
+{
+  EFI_STATUS                      Status;
+  EFI_MM_CONFIGURATION_PROTOCOL  *MmConfiguration;
+
+  DEBUG ((EFI_D_INFO, "MmConfigurationMmNotify(%g) - %x\n", Protocol, Interface));
+
+  MmConfiguration = Interface;
+
+  //
+  // Register the MM Entry Point provided by the MM Core with the MM COnfiguration protocol
+  //
+  Status = MmConfiguration->RegisterMmFoundationEntry (MmConfiguration, (EFI_SMM_ENTRY_POINT)(UINTN)gSmmCorePrivate->SmmEntryPoint);
+  ASSERT_EFI_ERROR (Status);
+
+  //
+  // Set flag to indicate that the MM Entry Point has been registered which
+  // means that MMIs are now fully operational.
+  //
+  gSmmCorePrivate->SmmEntryPointRegistered = TRUE;
+
+  //
+  // Print debug message showing MM Core entry point address.
+  //
+  DEBUG ((DEBUG_INFO, "MM Core registered MM Entry Point address %p\n", (VOID *)(UINTN)gSmmCorePrivate->SmmEntryPoint));
+  return EFI_SUCCESS;
+}
+
 UINTN
 GetHobListSize (
   IN VOID *HobStart
@@ -702,6 +736,18 @@ SmmMainStandalone (
   Status = SmmRegisterProtocolNotify (
              &gEfiSmmConfigurationSmmProtocolGuid,
              SmmConfigurationSmmNotify,
+             &Registration
+             );
+  ASSERT_EFI_ERROR (Status);
+
+  //
+  // Register notification for EFI_MM_CONFIGURATION_PROTOCOL registration and
+  // use it to register the MM Foundation entrypoint
+  //
+  DEBUG ((EFI_D_INFO, "MmRegisterProtocolNotify - MmConfigurationMmProtocol\n"));
+  Status = SmmRegisterProtocolNotify (
+             &gEfiMmConfigurationProtocolGuid,
+             MmConfigurationMmNotify,
              &Registration
              );
   ASSERT_EFI_ERROR (Status);

@@ -23,8 +23,9 @@
 #include <Protocol/SmmReadyToLock.h>
 #include <Protocol/SmmEndOfDxe.h>
 #include <Protocol/SmmCommunication.h>
-#include <Protocol/LoadedImage.h>       
+#include <Protocol/LoadedImage.h>
 #include <Protocol/SmmConfigurationSmm.h>
+#include <Protocol/MmConfiguration.h>
 
 #include <Guid/Apriori.h>
 #include <Guid/EventGroup.h>

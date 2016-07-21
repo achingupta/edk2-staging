@@ -60,6 +60,7 @@ READ_LOCK_CAP      = TRUE
 READ_LOCK_STATUS   = TRUE
 
   INF StandaloneSmmPkg/StandaloneSmmCore/StandaloneSmmCore.inf
+  INF StandaloneSmmPkg/Arm/PiMmCpuStandaloneMm/PiMmCpuStandaloneMm.inf
 
 ################################################################################
 #

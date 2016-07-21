@@ -66,6 +66,9 @@
   gEfiLoadedImageProtocolGuid                   ## PRODUCES
   gEfiSmmConfigurationSmmProtocolGuid
 
+[Protocols.AARCH64]
+  gEfiMmConfigurationProtocolGuid               ## CONSUMES
+
 [Pcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdLoadFixAddressSmmCodePageNumber     ## SOMETIMES_CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdLoadModuleAtFixAddressEnable        ## CONSUMES

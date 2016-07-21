@@ -224,6 +224,9 @@
   StandaloneSmmPkg/X86/CpuMpInfoPei/CpuMpInfoPei.inf
   StandaloneSmmPkg/X86/PiSmmCpuStandaloneSmm/PiSmmCpuStandaloneSmm.inf
 
+[Components.AARCH64]
+  StandaloneSmmPkg/Arm/PiMmCpuStandaloneMm/PiMmCpuStandaloneMm.inf
+
 ###################################################################################################
 #
 # BuildOptions Section - Define the module specific tool chain flags that should be used as
