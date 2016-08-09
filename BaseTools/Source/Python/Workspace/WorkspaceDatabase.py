@@ -1977,6 +1977,10 @@ class InfBuildData(ModuleBuildClassObject):
             if (self._Specification == None) or (not 'PI_SPECIFICATION_VERSION' in self._Specification) or (int(self._Specification['PI_SPECIFICATION_VERSION'], 16) < 0x0001000A):
                 if self._ModuleType == SUP_MODULE_SMM_CORE:
                     EdkLogger.error("build", FORMAT_NOT_SUPPORTED, "SMM_CORE module type can't be used in the module with PI_SPECIFICATION_VERSION less than 0x0001000A", File=self.MetaFile)
+                if self._ModuleType == SUP_MODULE_SMM_CORE_STANDALONE:
+                    EdkLogger.error("build", FORMAT_NOT_SUPPORTED, "SMM_CORE_STANDALONE module type can't be used in the module with PI_SPECIFICATION_VERSION less than 0x0001000A", File=self.MetaFile)
+                if self._ModuleType == SUP_MODULE_SMM_STANDALONE:
+                    EdkLogger.error("build", FORMAT_NOT_SUPPORTED, "SMM_STANDALONE module type can't be used in the module with PI_SPECIFICATION_VERSION less than 0x0001000A", File=self.MetaFile)
             if self._Defs and 'PCI_DEVICE_ID' in self._Defs and 'PCI_VENDOR_ID' in self._Defs \
                and 'PCI_CLASS_CODE' in self._Defs and 'PCI_REVISION' in self._Defs:
                 self._BuildType = 'UEFI_OPTIONROM'
