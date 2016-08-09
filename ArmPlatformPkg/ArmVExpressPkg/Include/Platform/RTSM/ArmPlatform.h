@@ -50,6 +50,10 @@
 #define ARM_VE_DRAM_BASE                        PcdGet64 (PcdSystemMemoryBase)
 #define ARM_VE_DRAM_SZ                          PcdGet64 (PcdSystemMemorySize)
 
+// MM Communication buffer
+#define ARM_VE_MM_BUFFER_BASE                   PcdGet64 (PcdMmBufferBase)
+#define ARM_VE_MM_BUFFER_SZ                     PcdGet64 (PcdMmBufferSize)
+
 // This can be any value since we only support motherboard PL111
 #define LCD_VRAM_CORE_TILE_BASE                 0x00000000
 

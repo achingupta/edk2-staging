@@ -106,6 +106,12 @@ ArmPlatformGetVirtualMemoryMap (
   VirtualMemoryTable[Index].Length = ARM_VE_DRAM_SZ;
   VirtualMemoryTable[Index].Attributes = CacheAttributes;
 
+  // MM Communication Buffer
+  VirtualMemoryTable[++Index].PhysicalBase = PcdGet64(PcdMmBufferBase);
+  VirtualMemoryTable[Index].VirtualBase  = PcdGet64(PcdMmBufferBase);
+  VirtualMemoryTable[Index].Length       = PcdGet64(PcdMmBufferSize);
+  VirtualMemoryTable[Index].Attributes   = CacheAttributes;
+
   // CPU peripherals. TRM. Manual says not all of them are implemented.
   VirtualMemoryTable[++Index].PhysicalBase = ARM_VE_ON_CHIP_PERIPH_BASE;
   VirtualMemoryTable[Index].VirtualBase = ARM_VE_ON_CHIP_PERIPH_BASE;

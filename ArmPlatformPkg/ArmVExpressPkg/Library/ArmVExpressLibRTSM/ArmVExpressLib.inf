@@ -44,6 +44,10 @@
 [Sources.AARCH64]
   AArch64/RTSMHelper.S
 
+[Pcd]
+  gArmTokenSpaceGuid.PcdMmBufferBase
+  gArmTokenSpaceGuid.PcdMmBufferSize
+
 [FeaturePcd]
   gEmbeddedTokenSpaceGuid.PcdCacheEnable
   gArmPlatformTokenSpaceGuid.PcdNorFlashRemapping

@@ -121,6 +121,14 @@ MemoryPeim (
     );
   }
 
+  // Reserve the memory space for the MM communication buffer
+  BuildResourceDescriptorHob (
+       EFI_RESOURCE_MEMORY_RESERVED,
+       ResourceAttributes,
+       PcdGet64 (PcdMmBufferBase),
+       PcdGet64 (PcdMmBufferSize)
+  );
+
   //
   // Reserved the memory space occupied by the firmware volume
   //
