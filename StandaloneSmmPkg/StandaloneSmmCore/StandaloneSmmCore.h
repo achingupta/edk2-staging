@@ -27,6 +27,7 @@
 #include <Protocol/SmmConfigurationSmm.h>
 #include <Protocol/MmConfiguration.h>
 #include <Protocol/MmGuidedEventManagement.h>
+#include <Protocol/MmHandlerNotification.h>
 
 #include <Guid/Apriori.h>
 #include <Guid/EventGroup.h>
@@ -600,6 +601,48 @@ EFI_STATUS
 EFIAPI
 SmiHandlerUnRegister (
   IN  EFI_HANDLE                      DispatchHandle
+  );
+
+/**
+  Registers a callback function that this invoked whenever a SMI handler is registered through SmiHandlerRegister()
+  If Function == NULL and Registration is an existing registration, then the callback is unhooked.
+
+  @param  Function        Points to the notification function.
+  @param  Registration    Successfully returned the registration record
+                          that has been added or unhooked.
+
+  @retval EFI_SUCCESS           Handler register success.
+  @retval EFI_INVALID_PARAMETER Registration is NULL.
+  @retval EFI_OUT_OF_RESOURCES  Not enough memory resource to finish the request.
+  @retval EFI_NOT_FOUND         If the registration is not found when Function == NULL.
+**/
+EFI_STATUS
+EFIAPI
+SmiHandlerRegisterNotifierRegister (
+  IN  EFI_SMM_HANDLER_REGISTER_NOTIFY_FN  Notifier,
+  OUT VOID                                **Registration
+  );
+
+/**
+  Registers a callback function that this invoked whenever a SMI handler is
+  unregistered through SmiHandlerUnregister()
+  If Function == NULL and Registration is an existing registration, then the
+  callback is unhooked.
+
+  @param  Function        Points to the notification function.
+  @param  Registration    Successfully returned the registration record
+                          that has been added or unhooked.
+
+  @retval EFI_SUCCESS           Handler register success.
+  @retval EFI_INVALID_PARAMETER Registration is NULL.
+  @retval EFI_OUT_OF_RESOURCES  Not enough memory resource to finish the request.
+  @retval EFI_NOT_FOUND         If the registration is not found when Function == NULL.
+**/
+EFI_STATUS
+EFIAPI
+SmiHandlerUnregisterNotifierRegister (
+  IN  EFI_SMM_HANDLER_UNREGISTER_NOTIFY_FN  Notifier,
+  OUT VOID                                  **Registration
   );
 
 /**

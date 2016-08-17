@@ -65,6 +65,7 @@
   gEfiSmmEndOfDxeProtocolGuid                   ## PRODUCES
   gEfiLoadedImageProtocolGuid                   ## PRODUCES
   gEfiSmmConfigurationSmmProtocolGuid
+  gEfiMmHandlerNotificationProtocolGuid         ## Produces
 
 [Protocols.AARCH64]
   gEfiMmConfigurationProtocolGuid               ## CONSUMES
