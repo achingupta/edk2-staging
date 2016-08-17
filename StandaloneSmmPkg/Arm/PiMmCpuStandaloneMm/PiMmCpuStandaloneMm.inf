@@ -47,6 +47,7 @@
 [Protocols]
   gEfiMmConfigurationProtocolGuid		# PROTOCOL ALWAYS_PRODUCED
   gEfiMmGuidedEventManagementProtocolGuid       # PROTOCOL ALWAYS_PRODUCED
+  gEfiMmHandlerNotificationProtocolGuid         # PROTOCOL ALWAYS_CONSUMED
   gEfiSmmCpuProtocolGuid                	# PROTOCOL ALWAYS_PRODUCED
 
 [Guids]

@@ -26,6 +26,7 @@
 
 #include <Protocol/MmConfiguration.h>
 #include <Protocol/MmGuidedEventManagement.h>
+#include <Protocol/MmHandlerNotification.h>
 #include <Protocol/SmmCpu.h>
 #include <Protocol/DebugSupport.h> // for EFI_SYSTEM_CONTEXT
 
@@ -35,6 +36,20 @@
 #include <Guid/SmmUefiInfo.h>
 
 #include <IndustryStandard/ArmStdSmc.h>
+
+EFI_STATUS
+EFIAPI
+ArmMmiHandlerRegisterNotifier (
+  IN EFI_SMM_HANDLER_ENTRY_POINT2   Handler,
+  IN CONST EFI_GUID                 *HandlerType   OPTIONAL
+  );
+
+EFI_STATUS
+EFIAPI
+ArmMmiHandlerUnregisterNotifier (
+  IN EFI_SMM_HANDLER_ENTRY_POINT2   Handler,
+  IN CONST EFI_GUID                 *HandlerType   OPTIONAL
+  );
 
 EFI_STATUS
 EFIAPI
@@ -514,6 +529,85 @@ ValidateAndFindEventIdFromGuid(
 
   // Find the event id corresponding to this GUID
   return FindEventIdFromGuid(Guid, EventId);
+}
+
+EFI_STATUS
+EFIAPI
+ArmMmiHandlerRegisterNotifier (
+  IN EFI_SMM_HANDLER_ENTRY_POINT2   Handler,
+  IN CONST EFI_GUID                 *HandlerType   OPTIONAL
+  ) {
+  EFI_STATUS   Status;
+  UINTN        EventId;
+  ARM_SVC_ARGS RegisterEventSvcArgs = {0};
+
+  // Find the event id corresponding to this GUID
+  Status = ValidateAndFindEventIdFromGuid(HandlerType, &EventId);
+  if (Status != EFI_SUCCESS) {
+    DEBUG ((EFI_D_INFO, "ArmMmiHandlerRegisterNotifier - Unknown GUID %g, Handler - 0x%x\n, Status - %d", HandlerType, Handler, Status));
+    return Status;
+  }
+
+  DEBUG ((EFI_D_INFO, "ArmMmiHandlerRegisterNotifier - GUID %g, Handler - 0x%x, EventId %d\n", HandlerType, Handler, EventId));
+
+  // Check if the event has already been registered with EL3 else do so
+  if (EventIdInfo[EventId].HandlerCount == 0) {
+
+    // Prepare arguments to register and enable this event at EL3 and
+    // check if the GUID corresponds to an event that can be registered
+    RegisterEventSvcArgs.Arg0 = ARM_SMC_ID_MM_EVENT_REGISTER_AARCH64;
+    RegisterEventSvcArgs.Arg1 = EventId;
+    RegisterEventSvcArgs.Arg2 = (UINTN) _PiMmCpuStandaloneMmEntryPoint;
+
+    ArmCallSvc(&RegisterEventSvcArgs);
+    Status = RegisterEventSvcArgs.Arg0;
+    if (Status != EFI_SUCCESS) {
+      DEBUG ((EFI_D_INFO, "ArmMmiHandlerRegisterNotifier- Unable to register EventId %d, Status %d\n", EventId, Status));
+      return Status;
+    }
+  }
+
+  EventIdInfo[EventId].HandlerCount++;
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
+ArmMmiHandlerUnregisterNotifier (
+  IN EFI_SMM_HANDLER_ENTRY_POINT2   Handler,
+  IN CONST EFI_GUID                 *HandlerType   OPTIONAL
+  ) {
+  EFI_STATUS Status;
+  UINTN EventId;
+  ARM_SVC_ARGS UnRegisterEventSvcArgs = {0};
+
+  // Find the event id corresponding to this GUID
+  Status = ValidateAndFindEventIdFromGuid(HandlerType, &EventId);
+  if (Status != EFI_SUCCESS) {
+    DEBUG ((EFI_D_INFO, "ArmMmiHandlerUnregisterNotifier - Unknown GUID %g, Handler - 0x%x\n, Status - %d", HandlerType, Handler, Status));
+    return Status;
+  }
+
+  // Check if there is a handler registered for this Guided event. Decrement the
+  // handler counter if so. Else, this is an attempt to unregister a handler
+  // that was never registered.
+  if (!EventIdInfo[EventId].HandlerCount)
+    return EFI_INVALID_PARAMETER;
+
+  EventIdInfo[EventId].HandlerCount--;
+
+  // If the event has a 0 handler count then it has to be unregistered at EL3
+  if (EventIdInfo[EventId].HandlerCount == 0) {
+    UnRegisterEventSvcArgs.Arg0 = ARM_SMC_ID_MM_EVENT_UNREGISTER_AARCH64;
+    UnRegisterEventSvcArgs.Arg1 = EventId;
+    ArmCallSvc(&UnRegisterEventSvcArgs);
+    Status = UnRegisterEventSvcArgs.Arg0;
+    if (Status != EFI_SUCCESS) {
+      DEBUG ((EFI_D_INFO, "ArmMmiHandlerUnregisterNotifier- Unable to unregister EventId %d, Status %d\n", EventId, Status));
+    }
+  }
+
+  return Status;
 }
 
 EFI_STATUS
