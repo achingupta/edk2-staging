@@ -69,6 +69,20 @@ LIST_ENTRY mSmiHandlerUnregisterNotifierList = INITIALIZE_LIST_HEAD_VARIABLE(mSm
 LIST_ENTRY  mRootSmiHandlerList = INITIALIZE_LIST_HEAD_VARIABLE (mRootSmiHandlerList);
 LIST_ENTRY  mSmiEntryList       = INITIALIZE_LIST_HEAD_VARIABLE (mSmiEntryList);
 
+VOID
+EFIAPI
+SmiHandlerRegisterNotify (
+  IN EFI_SMM_HANDLER_ENTRY_POINT2 Handler,
+  IN CONST EFI_GUID               *HandlerType
+  );
+
+VOID
+EFIAPI
+SmiHandlerUnregisterNotify (
+  IN EFI_SMM_HANDLER_ENTRY_POINT2 Handler,
+  IN CONST EFI_GUID               *HandlerType
+  );
+
 /**
   Finds the SMI entry for the requested handler type.
 
@@ -305,6 +319,10 @@ SmiHandlerRegister (
 
   *DispatchHandle = (EFI_HANDLE) SmiHandler;
 
+  //
+  // Call the registered callbacks to notify drivers about this registration event.
+  //
+  SmiHandlerRegisterNotify(Handler, HandlerType);
   return EFI_SUCCESS;
 }
 
@@ -338,6 +356,15 @@ SmiHandlerUnRegister (
 
   SmiEntry = SmiHandler->SmiEntry;
 
+  //
+  // Call the registered callbacks to notify drivers about this registration event.
+  //
+  if (SmiEntry) {
+    SmiHandlerUnregisterNotify(SmiHandler->Handler, &SmiEntry->HandlerType);
+  } else {
+    SmiHandlerUnregisterNotify(SmiHandler->Handler, NULL);
+  }
+
   RemoveEntryList (&SmiHandler->Link);
   FreePool (SmiHandler);
 
@@ -358,6 +385,65 @@ SmiHandlerUnRegister (
   }
 
   return EFI_SUCCESS;
+}
+
+
+/**
+  Invokes all the registered callback functions whenever SmiHandlerRegister() is successfully invoked
+
+  @param  Handler        Points to the function registered.
+  @param  HandlerType    Points to the GUID of the event for which Handler was registered
+
+**/
+VOID
+EFIAPI
+SmiHandlerRegisterNotify (
+  IN EFI_SMM_HANDLER_ENTRY_POINT2 Handler,
+  IN CONST EFI_GUID               *HandlerType
+  )
+{
+  SMI_REGISTER_NOTIFY *Item;
+  LIST_ENTRY          *Link; 
+
+  ASSERT(Handler);
+
+  for (Link = mSmiHandlerRegisterNotifierList.ForwardLink;
+       Link != &mSmiHandlerRegisterNotifierList;
+       Link = Link->ForwardLink) {
+
+    Item = CR (Link, SMI_REGISTER_NOTIFY, AllEntries, SMI_REGISTER_NOTIFY_SIGNATURE);
+    Item->Notifier(Handler, HandlerType);
+  }
+
+}
+
+/**
+  Invokes all the registered callback functions whenever SmiHandlerUnregister() is successfully invoked
+
+  @param  Handler        Points to the function unregistered.
+  @param  HandlerType    Points to the GUID of the event for which Handler was unregistered
+
+**/
+VOID
+EFIAPI
+SmiHandlerUnregisterNotify (
+  IN EFI_SMM_HANDLER_ENTRY_POINT2 Handler,
+  IN CONST EFI_GUID               *HandlerType
+  )
+{
+  SMI_UNREGISTER_NOTIFY *Item;
+  LIST_ENTRY          *Link; 
+
+  ASSERT(Handler);
+
+  for (Link = mSmiHandlerUnregisterNotifierList.ForwardLink;
+       Link != &mSmiHandlerUnregisterNotifierList;
+       Link = Link->ForwardLink) {
+
+    Item = CR (Link, SMI_UNREGISTER_NOTIFY, AllEntries, SMI_UNREGISTER_NOTIFY_SIGNATURE);
+    Item->Notifier(Handler, HandlerType);
+  }
+
 }
 
 /**
