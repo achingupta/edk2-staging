@@ -301,6 +301,13 @@ PiMmCpuStandaloneMmEntryPoint (
   // TODO: Populate entire entry point context with valid information
   MmEntryPointContext.CurrentlyExecutingCpu = CpuNumber;
   MmEntryPointContext.NumberOfCpus = mMpInformationHobData->NumberOfProcessors;
+
+  // Populate the MM system table with MP and state information
+  mSmst->CurrentlyExecutingCpu = CpuNumber;
+  mSmst->NumberOfCpus = mMpInformationHobData->NumberOfProcessors;
+  mSmst->CpuSaveStateSize = 0;
+  mSmst->CpuSaveState = NULL;
+
   mMmEntryPoint(&MmEntryPointContext);
 
   // Free the memory allocation done earlier and reset the per-cpu context
