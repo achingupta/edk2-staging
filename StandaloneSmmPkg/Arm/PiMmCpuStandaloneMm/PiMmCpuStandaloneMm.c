@@ -103,6 +103,15 @@ ArmMmCpuWriteSaveState (
   IN CONST VOID                   *Buffer
   );
 
+EFI_STATUS
+EFIAPI
+ArmTrustedFirmwareRootHandler (
+  IN     EFI_HANDLE               DispatchHandle,
+  IN     CONST VOID               *Context,        OPTIONAL
+  IN OUT VOID                     *CommBuffer,     OPTIONAL
+  IN OUT UINTN                    *CommBufferSize  OPTIONAL
+  );
+
 extern EFI_STATUS _PiMmCpuStandaloneMmEntryPoint (
   IN UINTN EventId,
   IN UINTN CpuNumber,
@@ -762,4 +771,53 @@ ArmMmCpuWriteSaveState(
   ) {
   // todo: implement
   return EFI_UNSUPPORTED;
+}
+
+/**
+  This function is the main entry point for an SMM handler dispatch
+  or communicate-based callback.
+
+  @param  DispatchHandle  The unique handle assigned to this handler by SmiHandlerRegister().
+  @param  Context         Points to an optional handler context which was specified when the handler was registered.
+  @param  CommBuffer      A pointer to a collection of data in memory that will
+                          be conveyed from a non-SMM environment into an SMM environment.
+  @param  CommBufferSize  The size of the CommBuffer.
+
+  @return Status Code
+
+**/
+EFI_STATUS
+EFIAPI
+ArmTrustedFirmwareRootHandler (
+  IN     EFI_HANDLE               DispatchHandle,
+  IN     CONST VOID               *Context,        OPTIONAL
+  IN OUT VOID                     *CommBuffer,     OPTIONAL
+  IN OUT UINTN                    *CommBufferSize  OPTIONAL
+  )
+{
+  EFI_STATUS Status;
+  UINTN      CpuNumber;
+
+  ASSERT (Context == NULL);
+  ASSERT (CommBuffer == NULL);
+  ASSERT (CommBufferSize == NULL);
+
+  CpuNumber = mSmst->CurrentlyExecutingCpu;
+  if (!PerCpuGuidedEventContext[CpuNumber])
+    return EFI_NOT_FOUND;
+
+  DEBUG ((EFI_D_INFO, "CommBuffer - 0x%x, CommBufferSize - 0x%x\n",
+          PerCpuGuidedEventContext[CpuNumber],
+	  PerCpuGuidedEventContext[CpuNumber]->MessageLength));
+
+  Status = mSmst->SmiManage(&PerCpuGuidedEventContext[CpuNumber]->HeaderGuid,
+                     NULL,
+                     PerCpuGuidedEventContext[CpuNumber]->Data,
+                     &PerCpuGuidedEventContext[CpuNumber]->MessageLength);
+
+  if (Status != EFI_SUCCESS) {
+    DEBUG ((EFI_D_WARN, "Unable to manage Guided Event - %d\n", Status));
+  }
+
+  return Status;
 }
