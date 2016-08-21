@@ -25,7 +25,6 @@
 #include <Library/HobLib.h>
 
 #include <Protocol/MmConfiguration.h>
-#include <Protocol/MmGuidedEventManagement.h>
 #include <Protocol/MmHandlerNotification.h>
 #include <Protocol/SmmCpu.h>
 #include <Protocol/DebugSupport.h> // for EFI_SYSTEM_CONTEXT
@@ -51,31 +50,6 @@ ArmMmiHandlerUnregisterNotifier (
   IN CONST EFI_GUID                 *HandlerType   OPTIONAL
   );
 
-EFI_STATUS
-EFIAPI
-ArmMmiHandlerRegister(
-  IN  CONST EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *This,
-  IN  EFI_SMM_HANDLER_ENTRY_POINT2                   Handler,
-  IN  CONST EFI_GUID                                *HandlerType  OPTIONAL,
-  OUT EFI_HANDLE                                    *DispatchHandle
-  );
-
-EFI_STATUS
-EFIAPI
-ArmMmiHandlerUnRegister(
-  IN  CONST EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *This,
-  IN  CONST EFI_GUID                                *HandlerType  OPTIONAL,
-  IN  EFI_HANDLE                                    *DispatchHandle
-  );
-
-EFI_STATUS
-EFIAPI
-ArmMmiGetContext(
-  IN  CONST EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *This,
-  IN  UINTN                                         CpuNumber,
-  OUT  VOID                                         **CommBuffer,
-  OUT  UINTN                                        *CommBufferSize
-  );
 EFI_STATUS
 EFIAPI
 ArmRegisterMmFoundationEntry (
@@ -218,13 +192,10 @@ EFI_SMM_CPU_PROTOCOL mMmCpuState = {
   ArmMmCpuWriteSaveState
 };
 
-EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL mMmGuidedEventMgmt = {
-  ArmMmiHandlerRegister,
-  ArmMmiHandlerUnRegister,
-  ArmMmiGetContext
-};
-
 EFI_SMM_ENTRY_POINT     mMmEntryPoint = NULL;
+
+// Pointer to handler notification protocol interface
+EFI_MM_HANDLER_NOTIFICATION_PROTOCOL *mMmHandlerNotification;
 
 EFI_STATUS
 PiMmCpuStandaloneMmEntryPoint (
@@ -361,11 +332,13 @@ PiMmCpuStandaloneMmInitialize (
   MP_INFORMATION_HOB_DATA         *MpInformationHobData;
   EFI_SMRAM_DESCRIPTOR            *SmramRanges;
   EFI_STATUS                       Status;
+  EFI_HANDLE                       DispatchHandle;
   UINT32                           SmramRangeCount;
   UINT32                           MpInfoSize;
   UINTN                            Index;
   UINTN                            ArraySize;
   VOID                            *HobStart;
+  VOID                            *Registration;
 
   ASSERT (SystemTable != NULL);
   mSmst = SystemTable;
@@ -384,9 +357,24 @@ PiMmCpuStandaloneMmInitialize (
     return Status;
   }
 
-  // publish the MM Guided event management protocol
-  Status = mSmst->SmmInstallProtocolInterface(&mMmCpuHandle,
-    &gEfiMmGuidedEventManagementProtocolGuid, EFI_NATIVE_INTERFACE, &mMmGuidedEventMgmt);
+  // register the root MMI handler
+  Status = mSmst->SmiHandlerRegister(ArmTrustedFirmwareRootHandler, NULL, &DispatchHandle);
+  if (EFI_ERROR(Status)) {
+    return Status;
+  }
+
+  // register notifiers for handler registration/un-registration
+  Status = mSmst->SmmLocateProtocol(&gEfiMmHandlerNotificationProtocolGuid, NULL, (VOID **) &mMmHandlerNotification);
+  if (EFI_ERROR(Status)) {
+    return Status;
+  }
+
+  Status = mMmHandlerNotification->SmiHandlerRegisterNotifierRegister(ArmMmiHandlerRegisterNotifier, &Registration);
+  if (EFI_ERROR(Status)) {
+    return Status;
+  }
+
+  Status = mMmHandlerNotification->SmiHandlerUnregisterNotifierRegister(ArmMmiHandlerUnregisterNotifier, &Registration);
   if (EFI_ERROR(Status)) {
     return Status;
   }
@@ -624,116 +612,6 @@ ArmMmiHandlerUnregisterNotifier (
   }
 
   return Status;
-}
-
-EFI_STATUS
-EFIAPI
-ArmMmiHandlerRegister(
-  IN  CONST EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *This,
-  IN  EFI_SMM_HANDLER_ENTRY_POINT2                   Handler,
-  IN  CONST EFI_GUID                                *HandlerType,
-  OUT EFI_HANDLE                                    *DispatchHandle
-  ) {
-  EFI_STATUS Status = EFI_SUCCESS;
-  UINTN EventId;
-  ARM_SVC_ARGS RegisterEventSvcArgs = {0};
-
-  // Find the event id corresponding to this GUID
-  Status = ValidateAndFindEventIdFromGuid(HandlerType, &EventId);
-  if (Status != EFI_SUCCESS)
-    return Status;
-
-  DEBUG ((EFI_D_INFO, "ArmMmiHandlerRegister - GUID %g, Handler - 0x%x, Event ID - %d\n",
-	  HandlerType,
-	  Handler,
-	  EventId));
-
-  //
-  // Register the handler with the main MM dispatcher. Bail out in case of an
-  // error
-  //
-  Status = mSmst->SmiHandlerRegister(Handler, HandlerType, DispatchHandle);
-  if (Status != EFI_SUCCESS)
-    return Status;
-
-  // Check if the event has already been registered with EL3 else do so
-  if (!EventIdInfo[EventId].HandlerCount) {
-
-    // Prepare arguments to register and enable this event at EL3 and
-    // check if the GUID corresponds to an event that can be registered
-    RegisterEventSvcArgs.Arg0 = ARM_SMC_ID_MM_EVENT_REGISTER_AARCH64;
-    RegisterEventSvcArgs.Arg1 = EventId;
-    RegisterEventSvcArgs.Arg2 = (UINTN) _PiMmCpuStandaloneMmEntryPoint;
-
-    ArmCallSvc(&RegisterEventSvcArgs);
-    if (RegisterEventSvcArgs.Arg0 != EFI_SUCCESS) {
-      Status = mSmst->SmiHandlerUnRegister(DispatchHandle);
-      ASSERT (Status == EFI_SUCCESS);
-      return EFI_INVALID_PARAMETER;
-    }
-  }
-
-  EventIdInfo[EventId].HandlerCount++;
-  return Status;
-}
-
-EFI_STATUS
-EFIAPI
-ArmMmiHandlerUnRegister(
-  IN  CONST EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *This,
-  IN  CONST EFI_GUID                                *HandlerType,
-  IN  EFI_HANDLE                                    *DispatchHandle
-  ) {
-  EFI_STATUS Status = EFI_SUCCESS;
-  UINTN EventId;
-  ARM_SVC_ARGS UnRegisterEventSvcArgs = {0};
-
-  // Find the event id corresponding to this GUID
-  Status = ValidateAndFindEventIdFromGuid(HandlerType, &EventId);
-  if (Status != EFI_SUCCESS)
-    return Status;
-
-  // Check if there is a handler registered for this Guided event. Decrement the
-  // handler counter if so. Else, this is an attempt to unregister a handler
-  // that was never registered.
-  if (!EventIdInfo[EventId].HandlerCount)
-    return EFI_INVALID_PARAMETER;
-
-  EventIdInfo[EventId].HandlerCount--;
-
-  // If the event has a 0 handler count then it has to be unregistered at EL3
-  if (!EventIdInfo[EventId].HandlerCount) {
-    UnRegisterEventSvcArgs.Arg0 = ARM_SMC_ID_MM_EVENT_UNREGISTER_AARCH64;
-    UnRegisterEventSvcArgs.Arg1 = EventId;
-    ArmCallSvc(&UnRegisterEventSvcArgs);
-    ASSERT (UnRegisterEventSvcArgs.Arg0 == EFI_SUCCESS);
-  }
-
-  //
-  // UnRegister the handler with the main MM dispatcher. Bail out in case of an
-  // error
-  //
-  return mSmst->SmiHandlerUnRegister(DispatchHandle);
-}
-
-EFI_STATUS
-EFIAPI
-ArmMmiGetContext(
-  IN  CONST EFI_MM_GUIDED_EVENT_MANAGEMENT_PROTOCOL *This,
-  IN  UINTN                                         CpuNumber,
-  OUT  VOID                                         **CommBuffer,
-  OUT  UINTN                                        *CommBufferSize
-  ) {
-  if (!CommBufferSize || !CommBuffer)
-    return EFI_INVALID_PARAMETER;
-
-  if (!PerCpuGuidedEventContext[CpuNumber])
-    return EFI_NOT_FOUND;
-
-  *CommBuffer = PerCpuGuidedEventContext[CpuNumber];
-  *CommBufferSize = PerCpuGuidedEventContext[CpuNumber]->MessageLength;
-
-  return EFI_SUCCESS;
 }
 
 EFI_STATUS
