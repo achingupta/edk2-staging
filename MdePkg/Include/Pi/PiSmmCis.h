@@ -208,6 +208,66 @@ EFI_STATUS
   IN EFI_HANDLE  DispatchHandle
   );
 
+/**
+  Function prototype for SMI handler register notifier.
+
+  @param[in] Handle              The handle on which the interface was installed.
+  @param[in] Handler             Handler service funtion pointer.
+  @param[in] HandlerType         Points to the handler type or NULL for root SMI handlers.
+
+  @retval EFI_SUCCESS            The interrupt was handled and quiesced. No other handlers 
+  @retval EFI_INVALID_PARAMETER  Handler is NULL or HandlerType is unrecognized
+**/
+typedef
+EFI_STATUS
+(EFIAPI *EFI_SMM_HANDLER_REGISTER_NOTIFY_FN)(
+  IN EFI_SMM_HANDLER_ENTRY_POINT2   Handler,
+  IN CONST EFI_GUID                 *HandlerType   OPTIONAL
+  );
+
+///
+/// The function prototype for SMI handler unregister notifier is the same as
+/// the prototype for the SMI handler register notifier.
+typedef EFI_SMM_HANDLER_REGISTER_NOTIFY_FN EFI_SMM_HANDLER_UNREGISTER_NOTIFY_FN;
+
+/**
+  Registers a callback function that is invoked whenever a SMI handler is registered.
+  If Function == NULL and Registration is an existing registration, then the callback is unhooked.
+
+  @param[in]       Function        Points to the notification function.
+  @param[in, out]  Registration    Successfully returned the registration record that has been added or unhooked.
+
+  @retval EFI_SUCCESS           Handler register success.
+  @retval EFI_INVALID_PARAMETER Registration is NULL.
+  @retval EFI_OUT_OF_RESOURCES  Not enough memory resource to finish the request.
+  @retval EFI_NOT_FOUND         If the registration is not found when Function == NULL.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *EFI_SMM_HANDLER_REGISTER_NOTIFIER_REGISTER)(
+  IN  EFI_SMM_HANDLER_REGISTER_NOTIFY_FN  Notifier,
+  OUT VOID                                **Registration
+  );
+
+/**
+  Registers a callback function that is invoked whenever a SMI handler is unregistered.
+  If Function == NULL and Registration is an existing registration, then the callback is unhooked.
+
+  @param[in]       Function        Points to the notification function.
+  @param[in, out]  Registration    Successfully returned the registration record that has been added or unhooked.
+
+  @retval EFI_SUCCESS           Handler register success.
+  @retval EFI_INVALID_PARAMETER Registration is NULL.
+  @retval EFI_OUT_OF_RESOURCES  Not enough memory resource to finish the request.
+  @retval EFI_NOT_FOUND         If the registration is not found when Function == NULL.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *EFI_SMM_HANDLER_UNREGISTER_NOTIFIER_REGISTER)(
+  IN  EFI_SMM_HANDLER_UNREGISTER_NOTIFY_FN  Notifier,
+  OUT VOID                                  **Registration
+  );
+
 ///
 /// Processor information and functionality needed by SMM Foundation.
 ///
