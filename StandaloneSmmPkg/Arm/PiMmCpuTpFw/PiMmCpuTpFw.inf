@@ -18,16 +18,16 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = ArmPiMmCpuStandaloneMm
+  BASE_NAME                      = ArmPiMmCpuTpFw
   FILE_GUID                      = 58F7A62B-6280-42A7-BC38-10535A64A92C
   MODULE_TYPE                    = SMM_STANDALONE
   VERSION_STRING                 = 1.0
   PI_SPECIFICATION_VERSION       = 0x0001000A
-  ENTRY_POINT                    = PiMmCpuStandaloneMmInitialize
+  ENTRY_POINT                    = PiMmCpuTpFwInitialize
 
 [Sources]
-  PiMmCpuStandaloneMm.c
-  PiMmCpuStandaloneMmEntry.S
+  PiMmCpuTpFw.c
+  PiMmCpuTpFwEntry.S
 
 [Packages]
   ArmPkg/ArmPkg.dec
@@ -46,7 +46,7 @@
 
 [Protocols]
   gEfiMmConfigurationProtocolGuid		# PROTOCOL ALWAYS_PRODUCED
-  gEfiMmHandlerNotificationProtocolGuid         # PROTOCOL ALWAYS_CONSUMED
+  gEfiMmHandlerStateNotificationProtocolGuid         # PROTOCOL ALWAYS_CONSUMED
   gEfiSmmCpuProtocolGuid                	# PROTOCOL ALWAYS_PRODUCED
 
 [Guids]

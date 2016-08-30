@@ -225,7 +225,7 @@
   StandaloneSmmPkg/X86/PiSmmCpuStandaloneSmm/PiSmmCpuStandaloneSmm.inf
 
 [Components.AARCH64]
-  StandaloneSmmPkg/Arm/PiMmCpuStandaloneMm/PiMmCpuStandaloneMm.inf
+  StandaloneSmmPkg/Arm/PiMmCpuTpFw/PiMmCpuTpFw.inf
 
 ###################################################################################################
 #
