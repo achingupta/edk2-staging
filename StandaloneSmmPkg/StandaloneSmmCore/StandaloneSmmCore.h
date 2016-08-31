@@ -26,7 +26,7 @@
 #include <Protocol/LoadedImage.h>
 #include <Protocol/SmmConfigurationSmm.h>
 #include <Protocol/MmConfiguration.h>
-#include <Protocol/MmHandlerNotification.h>
+#include <Protocol/MmHandlerStateNotification.h>
 
 #include <Guid/Apriori.h>
 #include <Guid/EventGroup.h>
@@ -603,45 +603,35 @@ SmiHandlerUnRegister (
   );
 
 /**
-  Registers a callback function that this invoked whenever a SMI handler is registered through SmiHandlerRegister()
-  If Function == NULL and Registration is an existing registration, then the callback is unhooked.
+  Registers a callback function that is invoked whenever a SMI handler is registered/un-registered through SmiHandlerRegister()/SmiHandlerUnregister() respectively
 
-  @param  Function        Points to the notification function.
-  @param  Registration    Successfully returned the registration record
-                          that has been added or unhooked.
+  @param  Notifier              Points to the notification function.
+  @param  Registration          Returns the registration record that has been successfully added.
 
-  @retval EFI_SUCCESS           Handler register success.
+  @retval EFI_SUCCESS           Notification function registered successfully.
   @retval EFI_INVALID_PARAMETER Registration is NULL.
   @retval EFI_OUT_OF_RESOURCES  Not enough memory resource to finish the request.
-  @retval EFI_NOT_FOUND         If the registration is not found when Function == NULL.
 **/
 EFI_STATUS
 EFIAPI
-SmiHandlerRegisterNotifierRegister (
-  IN  EFI_SMM_HANDLER_REGISTER_NOTIFY_FN  Notifier,
-  OUT VOID                                **Registration
+SmiHandlerStateNotifierRegister (
+  IN  EFI_SMM_HANDLER_STATE_NOTIFY_FN  Notifier,
+  OUT VOID                             **Registration
   );
 
 /**
-  Registers a callback function that this invoked whenever a SMI handler is
-  unregistered through SmiHandlerUnregister()
-  If Function == NULL and Registration is an existing registration, then the
-  callback is unhooked.
+  Unregisters a callback function that is invoked whenever a SMI handler is registered/un-registered through SmiHandlerRegister()/SmiHandlerUnregister() respectively
 
-  @param  Function        Points to the notification function.
-  @param  Registration    Successfully returned the registration record
-                          that has been added or unhooked.
+  @param  Registration          Registration record returned upon successfully registering the callback function
 
-  @retval EFI_SUCCESS           Handler register success.
-  @retval EFI_INVALID_PARAMETER Registration is NULL.
-  @retval EFI_OUT_OF_RESOURCES  Not enough memory resource to finish the request.
-  @retval EFI_NOT_FOUND         If the registration is not found when Function == NULL.
+  @retval EFI_SUCCESS           Notifier unregistered successfully.
+  @retval EFI_INVALID_PARAMETER Registration is NULL
+  @retval EFI_NOT_FOUND         Registration record not found
 **/
 EFI_STATUS
 EFIAPI
-SmiHandlerUnregisterNotifierRegister (
-  IN  EFI_SMM_HANDLER_UNREGISTER_NOTIFY_FN  Notifier,
-  OUT VOID                                  **Registration
+SmiHandlerStateNotifierUnregister (
+  IN VOID                       *Registration
   );
 
 /**

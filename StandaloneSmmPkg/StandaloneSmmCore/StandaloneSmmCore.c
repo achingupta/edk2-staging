@@ -105,9 +105,9 @@ EFI_SYSTEM_TABLE                *mEfiSystemTable;
 UINTN                           mSmramRangeCount;
 EFI_SMRAM_DESCRIPTOR            *mSmramRanges;
 
-EFI_MM_HANDLER_NOTIFICATION_PROTOCOL mMmHandlerNotification = {
-  SmiHandlerRegisterNotifierRegister,
-  SmiHandlerUnregisterNotifierRegister
+EFI_MM_HANDLER_STATE_NOTIFICATION_PROTOCOL mMmHandlerStateNotification = {
+  SmiHandlerStateNotifierRegister,
+  SmiHandlerStateNotifierUnregister
 };
 
 /**
@@ -733,9 +733,9 @@ SmmMainStandalone (
   //
   // Install the handler notification protocol
   //
-  DEBUG ((EFI_D_INFO, "SmmInstallProtocolInterface - gEfiMmHandlerNotificationProtocolGuid\n"));
+  DEBUG ((EFI_D_INFO, "SmmInstallProtocolInterface - gEfiMmHandlerStateNotificationProtocolGuid\n"));
   Status = SmmInstallProtocolInterface(&mMmCpuHandle,
-    &gEfiMmHandlerNotificationProtocolGuid, EFI_NATIVE_INTERFACE, &mMmHandlerNotification);
+    &gEfiMmHandlerStateNotificationProtocolGuid, EFI_NATIVE_INTERFACE, &mMmHandlerStateNotification);
   if (EFI_ERROR(Status)) {
     return Status;
   }

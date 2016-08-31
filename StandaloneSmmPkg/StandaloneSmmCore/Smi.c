@@ -15,33 +15,18 @@
 #include "StandaloneSmmCore.h"
 
 //
-// SMM_HANDLER_REGISTER_NOTIFY
+// SMM_HANDLER_STATE_NOTIFIER
 //
 
-#define SMI_REGISTER_NOTIFY_SIGNATURE  SIGNATURE_32('s','m','i','r')
+#define SMI_HANDLER_STATE_NOTIFIER_SIGNATURE  SIGNATURE_32('s','m','i','n')
 
  typedef struct {
   UINTN                                 Signature;
   LIST_ENTRY                            AllEntries;  // All entries
+  EFI_SMM_HANDLER_STATE_NOTIFY_FN       Notifier;
+} SMI_HANDLER_STATE_NOTIFIER;
 
-  EFI_SMM_HANDLER_REGISTER_NOTIFY_FN    Notifier;
-} SMI_REGISTER_NOTIFY;
-
-//
-// SMM_HANDLER_UNREGISTER_NOTIFY
-//
-
-#define SMI_UNREGISTER_NOTIFY_SIGNATURE  SIGNATURE_32('s','m','i','u')
-
- typedef struct {
-  UINTN                                   Signature;
-  LIST_ENTRY                              AllEntries;  // All entries
-
-  EFI_SMM_HANDLER_UNREGISTER_NOTIFY_FN    Notifier;
-} SMI_UNREGISTER_NOTIFY;
-
-LIST_ENTRY mSmiHandlerRegisterNotifierList   = INITIALIZE_LIST_HEAD_VARIABLE(mSmiHandlerRegisterNotifierList);
-LIST_ENTRY mSmiHandlerUnregisterNotifierList = INITIALIZE_LIST_HEAD_VARIABLE(mSmiHandlerUnregisterNotifierList);
+LIST_ENTRY mSmiHandlerStateNotifierList   = INITIALIZE_LIST_HEAD_VARIABLE(mSmiHandlerStateNotifierList);
 
 //
 // SMM_HANDLER - used for each SMM handler
@@ -71,16 +56,10 @@ LIST_ENTRY  mSmiEntryList       = INITIALIZE_LIST_HEAD_VARIABLE (mSmiEntryList);
 
 VOID
 EFIAPI
-SmiHandlerRegisterNotify (
+SmiHandlerStateNotify (
   IN EFI_SMM_HANDLER_ENTRY_POINT2 Handler,
-  IN CONST EFI_GUID               *HandlerType
-  );
-
-VOID
-EFIAPI
-SmiHandlerUnregisterNotify (
-  IN EFI_SMM_HANDLER_ENTRY_POINT2 Handler,
-  IN CONST EFI_GUID               *HandlerType
+  IN CONST EFI_GUID               *HandlerType,
+  IN EFI_MM_HANDLER_STATE         HandlerState
   );
 
 /**
@@ -322,7 +301,7 @@ SmiHandlerRegister (
   //
   // Call the registered callbacks to notify drivers about this registration event.
   //
-  SmiHandlerRegisterNotify(Handler, HandlerType);
+  SmiHandlerStateNotify(Handler, HandlerType, HandlerRegistered);
   return EFI_SUCCESS;
 }
 
@@ -360,9 +339,9 @@ SmiHandlerUnRegister (
   // Call the registered callbacks to notify drivers about this registration event.
   //
   if (SmiEntry) {
-    SmiHandlerUnregisterNotify(SmiHandler->Handler, &SmiEntry->HandlerType);
+	  SmiHandlerStateNotify(SmiHandler->Handler, &SmiEntry->HandlerType, HandlerUnregistered);
   } else {
-    SmiHandlerUnregisterNotify(SmiHandler->Handler, NULL);
+	  SmiHandlerStateNotify(SmiHandler->Handler, NULL, HandlerUnregistered);
   }
 
   RemoveEntryList (&SmiHandler->Link);
@@ -389,195 +368,111 @@ SmiHandlerUnRegister (
 
 
 /**
-  Invokes all the registered callback functions whenever SmiHandlerRegister() is successfully invoked
+  Invokes all the registered callback functions whenever SmiHandlerRegister()/SmiHandlerUnregister() is successfully invoked
 
   @param  Handler        Points to the function registered.
   @param  HandlerType    Points to the GUID of the event for which Handler was registered
+  @param  HandlerState   Handler state i.e. registered or unregistered
 
 **/
 VOID
 EFIAPI
-SmiHandlerRegisterNotify (
+SmiHandlerStateNotify (
   IN EFI_SMM_HANDLER_ENTRY_POINT2 Handler,
-  IN CONST EFI_GUID               *HandlerType
+  IN CONST EFI_GUID               *HandlerType,
+  IN EFI_MM_HANDLER_STATE         HandlerState
   )
 {
-  SMI_REGISTER_NOTIFY *Item;
-  LIST_ENTRY          *Link; 
+  SMI_HANDLER_STATE_NOTIFIER *Item;
+  LIST_ENTRY            *Link; 
 
   ASSERT(Handler);
 
-  for (Link = mSmiHandlerRegisterNotifierList.ForwardLink;
-       Link != &mSmiHandlerRegisterNotifierList;
+  for (Link = mSmiHandlerStateNotifierList.ForwardLink;
+       Link != &mSmiHandlerStateNotifierList;
        Link = Link->ForwardLink) {
 
-    Item = CR (Link, SMI_REGISTER_NOTIFY, AllEntries, SMI_REGISTER_NOTIFY_SIGNATURE);
-    Item->Notifier(Handler, HandlerType);
+    Item = CR (Link, SMI_HANDLER_STATE_NOTIFIER, AllEntries, SMI_HANDLER_STATE_NOTIFIER_SIGNATURE);
+    Item->Notifier(Handler, HandlerType, HandlerState);
   }
 
 }
 
 /**
-  Invokes all the registered callback functions whenever SmiHandlerUnregister() is successfully invoked
+  Registers a callback function that is invoked whenever a SMI handler is registered/un-registered through SmiHandlerRegister()/SmiHandlerUnregister() respectively
 
-  @param  Handler        Points to the function unregistered.
-  @param  HandlerType    Points to the GUID of the event for which Handler was unregistered
+  @param  Notifier              Points to the notification function.
+  @param  Registration          Returns the registration record that has been successfully added.
 
-**/
-VOID
-EFIAPI
-SmiHandlerUnregisterNotify (
-  IN EFI_SMM_HANDLER_ENTRY_POINT2 Handler,
-  IN CONST EFI_GUID               *HandlerType
-  )
-{
-  SMI_UNREGISTER_NOTIFY *Item;
-  LIST_ENTRY          *Link; 
-
-  ASSERT(Handler);
-
-  for (Link = mSmiHandlerUnregisterNotifierList.ForwardLink;
-       Link != &mSmiHandlerUnregisterNotifierList;
-       Link = Link->ForwardLink) {
-
-    Item = CR (Link, SMI_UNREGISTER_NOTIFY, AllEntries, SMI_UNREGISTER_NOTIFY_SIGNATURE);
-    Item->Notifier(Handler, HandlerType);
-  }
-
-}
-
-/**
-  Registers a callback function that this invoked whenever a SMI handler is registered through SmiHandlerRegister()
-  If Function == NULL and Registration is an existing registration, then the callback is unhooked.
-
-  @param  Function        Points to the notification function.
-  @param  Registration    Successfully returned the registration record
-                          that has been added or unhooked.
-
-  @retval EFI_SUCCESS           Handler register success.
+  @retval EFI_SUCCESS           Notification function registered successfully.
   @retval EFI_INVALID_PARAMETER Registration is NULL.
   @retval EFI_OUT_OF_RESOURCES  Not enough memory resource to finish the request.
-  @retval EFI_NOT_FOUND         If the registration is not found when Function == NULL.
 **/
 EFI_STATUS
 EFIAPI
-SmiHandlerRegisterNotifierRegister (
-  IN  EFI_SMM_HANDLER_REGISTER_NOTIFY_FN  Notifier,
-  OUT VOID                                **Registration
+SmiHandlerStateNotifierRegister (
+  IN  EFI_SMM_HANDLER_STATE_NOTIFY_FN  Notifier,
+  OUT VOID                             **Registration
   )
 {
-  SMI_REGISTER_NOTIFY *SmiRegisterNotify;
-  LIST_ENTRY          *List;
+  SMI_HANDLER_STATE_NOTIFIER  *SmiHandlerStateNotifier;
+
+  if (!Registration || !Notifier) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // If notifiers have been provided then allocate an entry and add them to the
+  // list of notifiers.
+  //
+  SmiHandlerStateNotifier = AllocateZeroPool (sizeof (SMI_HANDLER_STATE_NOTIFIER));
+  if (SmiHandlerStateNotifier == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  SmiHandlerStateNotifier->Signature = SMI_HANDLER_STATE_NOTIFIER_SIGNATURE;
+  SmiHandlerStateNotifier->Notifier = Notifier;
+
+  //
+  // Add it to SMI register notifier entry list
+  //
+  InsertTailList (&mSmiHandlerStateNotifierList, &SmiHandlerStateNotifier->AllEntries);  
+  *Registration = (VOID *) SmiHandlerStateNotifier;
+
+  return EFI_SUCCESS;
+}
+
+/**
+  Unregisters a callback function that is invoked whenever a SMI handler is registered/un-registered through SmiHandlerRegister()/SmiHandlerUnregister() respectively
+
+  @param  Registration          Registration record returned upon successfully registering the callback function
+
+  @retval EFI_SUCCESS           Notifier unregistered successfully.
+  @retval EFI_INVALID_PARAMETER Registration is NULL
+  @retval EFI_NOT_FOUND         Registration record not found
+**/
+EFI_STATUS
+EFIAPI
+SmiHandlerStateNotifierUnregister (
+  IN VOID                       *Registration
+  )
+{
+  SMI_HANDLER_STATE_NOTIFIER  *SmiHandlerStateNotifier;
+  LIST_ENTRY                  *List;
 
   if (Registration == NULL) {
     return EFI_INVALID_PARAMETER;
   }
+  
+  SmiHandlerStateNotifier = Registration;
+  for (List = mSmiHandlerStateNotifierList.ForwardLink;
+       List != &mSmiHandlerStateNotifierList;
+       List = List->ForwardLink) {
 
-  if (Notifier) {
-    //
-    // If a notifier has been provided then allocate an entry and add it to the
-    // list of notifiers.
-    //
-    SmiRegisterNotify = AllocateZeroPool (sizeof (SMI_REGISTER_NOTIFY));
-    if (SmiRegisterNotify == NULL) {
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    SmiRegisterNotify->Signature = SMI_REGISTER_NOTIFY_SIGNATURE;
-    SmiRegisterNotify->Notifier = Notifier;
-
-    //
-    // Add it to SMI register notifier entry list
-    //
-    InsertTailList (&mSmiHandlerRegisterNotifierList, &SmiRegisterNotify->AllEntries);  
-    *Registration = (VOID *) SmiRegisterNotify;
-
-    return EFI_SUCCESS;
-  } else {
-    //
-    // If a notifier has not been provided then find the entry in the list and
-    // free its memory.
-    //  
-    SmiRegisterNotify = *Registration;
-    for (List = mSmiHandlerRegisterNotifierList.ForwardLink;
-	 List != &mSmiHandlerRegisterNotifierList;
-	 List = List->ForwardLink) {
-
-      if (SmiRegisterNotify == (CR (List, SMI_REGISTER_NOTIFY, AllEntries, SMI_REGISTER_NOTIFY_SIGNATURE))) {
-        RemoveEntryList (&SmiRegisterNotify->AllEntries);
-	FreePool (SmiRegisterNotify);
-	return EFI_SUCCESS;
-      }
-    }
-  }
-
-  return EFI_NOT_FOUND;
-}
-
-/**
-  Registers a callback function that this invoked whenever a SMI handler is
-  unregistered through SmiHandlerUnregister()
-  If Function == NULL and Registration is an existing registration, then the
-  callback is unhooked.
-
-  @param  Function        Points to the notification function.
-  @param  Registration    Successfully returned the registration record
-                          that has been added or unhooked.
-
-  @retval EFI_SUCCESS           Handler register success.
-  @retval EFI_INVALID_PARAMETER Registration is NULL.
-  @retval EFI_OUT_OF_RESOURCES  Not enough memory resource to finish the request.
-  @retval EFI_NOT_FOUND         If the registration is not found when Function == NULL.
-**/
-EFI_STATUS
-EFIAPI
-SmiHandlerUnregisterNotifierRegister (
-  IN  EFI_SMM_HANDLER_UNREGISTER_NOTIFY_FN  Notifier,
-  OUT VOID                                  **Registration
-  )
-{
-  SMI_UNREGISTER_NOTIFY *SmiUnregisterNotify;
-  LIST_ENTRY          *List;
-
-  if (Registration == NULL) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  if (Notifier) {
-    //
-    // If a notifier has been provided then allocate an entry and add it to the
-    // list of notifiers.
-    //
-    SmiUnregisterNotify = AllocateZeroPool (sizeof (SMI_UNREGISTER_NOTIFY));
-    if (SmiUnregisterNotify == NULL) {
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    SmiUnregisterNotify->Signature = SMI_UNREGISTER_NOTIFY_SIGNATURE;
-    SmiUnregisterNotify->Notifier = Notifier;
-
-    //
-    // Add it to SMI register notifier entry list
-    //
-    InsertTailList (&mSmiHandlerUnregisterNotifierList, &SmiUnregisterNotify->AllEntries);  
-    *Registration = (VOID *) SmiUnregisterNotify;
-
-    return EFI_SUCCESS;
-  } else {
-    //
-    // If a notifier has not been provided then find the entry in the list and
-    // free its memory.
-    //  
-    SmiUnregisterNotify = *Registration;
-    for (List = mSmiHandlerUnregisterNotifierList.ForwardLink;
-	 List != &mSmiHandlerUnregisterNotifierList;
-	 List = List->ForwardLink) {
-
-      if (SmiUnregisterNotify == (CR (List, SMI_UNREGISTER_NOTIFY, AllEntries, SMI_UNREGISTER_NOTIFY_SIGNATURE))) {
-        RemoveEntryList (&SmiUnregisterNotify->AllEntries);
-	FreePool (SmiUnregisterNotify);
-	return EFI_SUCCESS;
-      }
+    if (SmiHandlerStateNotifier == (CR (List, SMI_HANDLER_STATE_NOTIFIER, AllEntries, SMI_HANDLER_STATE_NOTIFIER_SIGNATURE))) {
+      RemoveEntryList (&SmiHandlerStateNotifier->AllEntries);
+      FreePool (SmiHandlerStateNotifier);
+      return EFI_SUCCESS;
     }
   }
 
