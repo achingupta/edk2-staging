@@ -1,6 +1,6 @@
 /** @file
 *
-*  Copyright (c) 2011-2016, ARM Limited. All rights reserved.
+*  Copyright (c) 2011-2017, ARM Limited. All rights reserved.
 *
 *  This program and the accompanying materials
 *  are licensed and made available under the terms and conditions of the BSD License
@@ -21,7 +21,7 @@
 #include <ArmPlatform.h>
 
 // Number of Virtual Memory Map Descriptors
-#define MAX_VIRTUAL_MEMORY_MAP_DESCRIPTORS          9
+#define MAX_VIRTUAL_MEMORY_MAP_DESCRIPTORS          10
 
 // DDR attributes
 #define DDR_ATTRIBUTES_CACHED   ARM_MEMORY_REGION_ATTRIBUTE_WRITE_BACK
