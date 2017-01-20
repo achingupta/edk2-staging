@@ -69,3 +69,6 @@ The following modules are related to Standalone MM:
 * MdeModulePkg
 * ArmPkg
 * ArmPlatformPkg
+
+# Prototype implementation
+Please see steps to build MM Standalone images and how to execute them here: [HowtoBuild](https://github.com/tianocore/edk2-staging/blob/AArch64StandaloneMm/HowtoBuild.MD)
