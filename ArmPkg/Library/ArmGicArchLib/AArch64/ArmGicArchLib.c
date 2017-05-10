@@ -56,11 +56,3 @@ Done:
   return RETURN_SUCCESS;
 }
 
-ARM_GIC_ARCH_REVISION
-EFIAPI
-ArmGicGetSupportedArchRevision (
-  VOID
-  )
-{
-  return mGicArchRevision;
-}
