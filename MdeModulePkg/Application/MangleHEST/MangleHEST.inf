@@ -1,0 +1,45 @@
+## @file
+#  Rewrite the HEST tables GHES records, allocating 64K per HEST for the Error
+#  Status Address. On a real system this would be baked in the platform memory map.
+#
+#  Based on an example which was:
+#  Copyright (c) 2008 - 2014, Intel Corporation. All rights reserved.<BR>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution. The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = MangleHEST
+  MODULE_UNI_FILE                = MangleHEST.uni
+  FILE_GUID                      = 90D38692-3A3E-41CA-B0A8-EF00F457B97C
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = UefiMain
+
+
+[Sources]
+  MangleHEST.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiApplicationEntryPoint
+  UefiLib
+  PcdLib
+
+[Guids]
+  gEfiAcpi10TableGuid
+  gEfiAcpiTableGuid
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  MangleHEST.uni
