@@ -1,6 +1,6 @@
 /** @file
 
-  Copyright (c) 2016, ARM Limited. All rights reserved.
+  Copyright (c) 2016-2017, ARM Limited. All rights reserved.
 
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
@@ -33,7 +33,6 @@
 #include <Protocol/Cpu.h>
 #include <Protocol/DebugSupport.h>
 #include <Protocol/DebugSupportPeriodicCallback.h>
-#include <Protocol/VirtualUncachedPages.h>
 #include <Protocol/LoadedImage.h>
 #include <Protocol/MmCommunication.h>
 
