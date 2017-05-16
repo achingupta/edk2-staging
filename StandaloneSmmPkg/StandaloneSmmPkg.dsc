@@ -2,6 +2,7 @@
 # Standalone SMM Platform.
 #
 # Copyright (c) 2015, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2016-2017, ARM Limited. All rights reserved.
 #
 #    This program and the accompanying materials
 #    are licensed and made available under the terms and conditions of the BSD License
@@ -225,7 +226,7 @@
   StandaloneSmmPkg/X86/PiSmmCpuStandaloneSmm/PiSmmCpuStandaloneSmm.inf
 
 [Components.AARCH64]
-  StandaloneSmmPkg/Arm/PiMmCpuTpFw/PiMmCpuTpFw.inf
+  StandaloneSmmPkg/Arm/Drivers/PiMmStandloneArmTfCpuDriver/PiMmStandloneArmTfCpuDriver.inf
 
 ###################################################################################################
 #

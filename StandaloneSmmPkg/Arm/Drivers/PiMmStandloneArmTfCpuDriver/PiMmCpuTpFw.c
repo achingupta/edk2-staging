@@ -3,7 +3,7 @@
   Copyright (c) 2008 - 2009, Apple Inc. All rights reserved.<BR>
   Copyright (c) 2011, ARM Limited. All rights reserved.
   Copyright (c) 2016 HP Development Company, L.P.
-  Copyright (c) 2016, ARM Limited. All rights reserved.
+  Copyright (c) 2017, ARM Limited. All rights reserved.
 
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
