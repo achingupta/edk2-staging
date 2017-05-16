@@ -18,13 +18,13 @@
 .text
 .align 3
 
-GCC_ASM_IMPORT(PiMmCpuTpFwEntryPoint)
-GCC_ASM_EXPORT(_PiMmCpuTpFwEntryPoint)
+GCC_ASM_IMPORT(PiMmStandloneArmTfCpuDriverEntry)
+GCC_ASM_EXPORT(_PiMmStandloneArmTfCpuDriverEntry)
 
 // Stub entry point to ensure that the stacks are completely unwound before
 // signalling completion of event handling
-ASM_PFX(_PiMmCpuTpFwEntryPoint):
-  bl    PiMmCpuTpFwEntryPoint
+ASM_PFX(_PiMmStandloneArmTfCpuDriverEntry):
+  bl    PiMmStandloneArmTfCpuDriverEntry
   mov   x1, x0
   mov	x0, #(ARM_SMC_ID_MM_EVENT_COMPLETE_AARCH64 & 0xffff)
   movk	x0, #((ARM_SMC_ID_MM_EVENT_COMPLETE_AARCH64 >> 16) & 0xffff), lsl #16
