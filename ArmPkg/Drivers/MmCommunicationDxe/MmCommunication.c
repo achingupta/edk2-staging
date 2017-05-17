@@ -187,7 +187,7 @@ MmCommunicationCommunicate (
 
   if (mNsBufferAddress) {
     CopyMem(mNsBufferAddress, CommBuffer, *BufferSizeAddress);
-    CommunicateSmcArgs.Arg1 = (UINTN) mNsBufferAddress;
+    CommunicateSmcArgs.Arg2 = (UINTN) mNsBufferAddress;
 
     // Copy the CommSize if used
     if (CommSize) {
@@ -195,12 +195,13 @@ MmCommunicationCommunicate (
       CopyMem(BufferSizeAddress, CommSize, sizeof(UINTN));
     }
   } else {
-    CommunicateSmcArgs.Arg1 = (UINTN) CommBuffer;
-    CommunicateSmcArgs.Arg2 = (UINTN) CommSize;
+    CommunicateSmcArgs.Arg2 = (UINTN) CommBuffer;
+    CommunicateSmcArgs.Arg3 = (UINTN) CommSize;
   }
 
   // Call the Standalone MM environment. The CommSize parameter is omitted
   CommunicateSmcArgs.Arg0 = ARM_SMC_ID_MM_COMMUNICATE_AARCH64;
+  DEBUG ((DEBUG_LOAD | DEBUG_INFO, "ARM_SMC_ID_MM_COMMUNICATE_AARCH64 0x%x - 0x%lx - 0x%x \n", CommunicateSmcArgs.Arg0, CommunicateSmcArgs.Arg2, CommunicateSmcArgs.Arg3));
   ArmCallSmc(&CommunicateSmcArgs);
 
   Status = CommunicateSmcArgs.Arg0;
@@ -261,45 +262,8 @@ MmCommunicationInitialize (
     return Status;
 
   //
-  // Query the secure world to obtain the extents of a pre-allocated buffer for
-  // communication. In its absence, the caller provided buffer will be passed as
-  // is to the secure world. Upon a successful return the values would be
-  // populated as follows:
-  //
-  // X0 = ARM_SMC_MM_RET_SUCCESS
-  // X1 = Address of buffer aligned to the 4K boundary
-  // X2 = Size of the buffer
-  //
-  // TODO: This approach currently assumes that the extents of this buffer were
-  //       populated in the virtual memory map and mapped into the translation
-  //       tables during the PEI phase. In the absence of a simple mechanism for
-  //       the PEI phase to convey the buffer details to this driver, it is
-  //       simpler to ask the secure world directly since the secure and
-  //       non-secure views of this buffer should be the same.
-  //
-  //       There would be no dependence on the PEI phase if the GCD
-  //       AddMemorySpace() service was able to dynamically map a buffer in the
-  //       translation tables instead of just the UEFI memory map. It would then
-  //       be a simple matter of obtaining the buffer extents from the secure
-  //       world and mapping it in.
-  //
-  MmSmcArgs.Arg0 = ARM_SMC_ID_MM_GET_NS_BUFFER_AARCH64;
-  ArmCallSmc(&MmSmcArgs);
-  if (MmSmcArgs.Arg0 == ARM_SMC_MM_RET_SUCCESS) {
-    mNsBufferAddress = (UINTN *) MmSmcArgs.Arg1;
-    mNsBufferMaxSize = MmSmcArgs.Arg2;
-
-    // TODO: Add support to map this buffer here as described previously
-
-    ZeroMem(mNsBufferAddress, mNsBufferMaxSize);
-    goto exit;
-  }
-
-  //
-  // If the ARM_SMC_ID_MM_GET_NS_BUFFER_AARCH64 did not work then rely on PCD
-  // values to obtain this information. if the buffer address is 0 then it is
-  // assumed that the caller of this protocol will provide a reference to the
-  // communication buffer.
+  // Use PCD values to obtain location and size of the MM communication
+  // buffer.
   //
   mNsBufferAddress = (VOID *) PcdGet64(PcdMmBufferBase);
   mNsBufferMaxSize = PcdGet64(PcdMmBufferSize);
