@@ -89,7 +89,6 @@ PiMmStandloneArmTfCpuDriverInitialize (
   UINTN                            Index;
   UINTN                            ArraySize;
   VOID                            *HobStart;
-  VOID                            *Registration;
 
   ASSERT (SystemTable != NULL);
   mSmst = SystemTable;
@@ -110,17 +109,6 @@ PiMmStandloneArmTfCpuDriverInitialize (
 
   // register the root MMI handler
   Status = mSmst->SmiHandlerRegister(PiMmCpuTpFwRootMmiHandler, NULL, &DispatchHandle);
-  if (EFI_ERROR(Status)) {
-    return Status;
-  }
-
-  // register notifiers for handler registration/un-registration
-  Status = mSmst->SmmLocateProtocol(&gEfiMmHandlerStateNotificationProtocolGuid, NULL, (VOID **) &mMmHandlerStateNotification);
-  if (EFI_ERROR(Status)) {
-    return Status;
-  }
-
-  Status = mMmHandlerStateNotification->SmiHandlerStateNotifierRegister(MmiHandlerStateNotifier, &Registration);
   if (EFI_ERROR(Status)) {
     return Status;
   }

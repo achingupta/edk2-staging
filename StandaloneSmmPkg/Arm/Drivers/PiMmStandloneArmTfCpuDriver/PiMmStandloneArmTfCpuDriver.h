@@ -57,51 +57,6 @@ MmWriteSaveState (
   );
 
 //
-// MM Handler State Notification protocol specific declarations
-//
-//
-
-// Many GUIDed events within the MM environment can correspond to a single Event
-// ID within the ARM Trusted Firmware environment. EVENT_ID_INFO keeps track of
-// the number of GUIDed event handlers registered for a particular ARM TF Event.
-//
-// TODO:
-//      1. This infomation could be maintained in the platform component of MM.
-//      2. Also, a flags field could be added to provide more information about
-//         the event e.g. the parameters are populated in GP registers (assumed
-//         currently), system registers or system memory.
-//      3. Events could local to a CPU or global. More thought is needed around
-//         this. Currently in the event ID, bits[3:0] contain the ID and bit[4]
-//         when set indicates a global event.
-//
-typedef struct {
-  UINT16   HandlerCount;
-} EVENT_ID_INFO;
-
-extern EVENT_ID_INFO EventIdInfo[];
-extern EFI_MM_HANDLER_STATE_NOTIFICATION_PROTOCOL *mMmHandlerStateNotification;
-
-EFI_STATUS
-EFIAPI
-MmiHandlerRegisterNotifier (
-  IN UINTN EventId
-  );
-
-EFI_STATUS
-EFIAPI
-MmiHandlerUnregisterNotifier (
-  IN UINTN EventId
-  );
-
-EFI_STATUS
-EFIAPI
-MmiHandlerStateNotifier (
-  IN EFI_SMM_HANDLER_ENTRY_POINT2   Handler,
-  IN CONST EFI_GUID                 *HandlerType   OPTIONAL,
-  IN EFI_MM_HANDLER_STATE           HandlerState
-  );
-
-//
 // MM event handling specific declarations
 //
 extern EFI_SMM_COMMUNICATE_HEADER    **PerCpuGuidedEventContext;

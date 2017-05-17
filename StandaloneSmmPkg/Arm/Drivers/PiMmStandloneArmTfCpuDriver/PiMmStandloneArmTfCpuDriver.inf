@@ -28,8 +28,6 @@
 [Sources]
   Init.c
   EventHandle.c
-  Entry.S
-  StateNotify.c
   StateSave.c
 
 [Packages]

@@ -84,26 +84,16 @@ PiMmStandloneArmTfCpuDriverEntry (
   EFI_SMM_COMMUNICATE_HEADER *GuidedEventContext = NULL;
   EFI_SMM_ENTRY_CONTEXT       MmEntryPointContext = {0};
   EFI_STATUS                  Status;
-  BOOLEAN                     UniqueGuidedEvent = FALSE;
   UINTN                       NsCommBufferSize;
 
   DEBUG ((EFI_D_INFO, "Received event - 0x%x on cpu %d\n", EventId, CpuNumber));
 
-  // Check whether any handler for this event has been registered
-  if (!EventIdInfo[EventId].HandlerCount)
-    return EFI_INVALID_PARAMETER;
-
-  // Check if this event corresponds to a single Guided handler or has multiple
-  // handlers registered.
-  // TODO: Remove assumptions that:
-  //       1. events with a 1:1 mapping to a GUID do not have arguments that
-  //          need to be copied into this translation regime.
-  //       2. events with a 1:N mapping with GUIDs always have a buffer address
-  //          and size in X1 and X2
-  if (EventIdToGuidLookupTable)
-    UniqueGuidedEvent = !CompareGuid(&EventIdToGuidLookupTable[EventId], &gZeroGuid);
-
-  if (UniqueGuidedEvent) {
+  //
+  // ARM TF passes SMC FID of the MM_COMMUNICATE interface as the Event ID upon
+  // receipt of a synchronous MM request. Use the Event ID to distinguish
+  // between synchronous and asynchronous events.
+  //
+  if (ARM_SMC_ID_MM_COMMUNICATE_AARCH64 != EventId) {
     // Found a GUID, allocate memory to populate a communication buffer
     // with the GUID in it
     Status = mSmst->SmmAllocatePool(EfiRuntimeServicesData, sizeof(EFI_SMM_COMMUNICATE_HEADER), (VOID **) &GuidedEventContext);
