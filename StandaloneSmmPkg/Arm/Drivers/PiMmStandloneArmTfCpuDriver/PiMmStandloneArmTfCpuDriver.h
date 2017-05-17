@@ -110,6 +110,13 @@ extern MP_INFORMATION_HOB_DATA       *mMpInformationHobData;
 extern EFI_MM_CONFIGURATION_PROTOCOL mMmConfig;
 
 EFI_STATUS
+PiMmStandloneArmTfCpuDriverEntry (
+  IN UINTN EventId,
+  IN UINTN CpuNumber,
+  IN UINTN NsCommBufferAddr
+  );
+
+EFI_STATUS
 EFIAPI
 PiMmCpuTpFwRootMmiHandler (
   IN     EFI_HANDLE               DispatchHandle,

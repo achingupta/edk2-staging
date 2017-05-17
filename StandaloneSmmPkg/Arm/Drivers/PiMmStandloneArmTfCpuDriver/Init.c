@@ -36,6 +36,11 @@
 // World
 extern EFI_GUID gEfiStandaloneMmNonSecureBufferGuid;
 
+// GUID to identify HOB where the entry point of this CPU driver will be
+// populated to allow the entry point driver to invoke it upon receipt of an
+// event
+extern EFI_GUID gEfiArmTfCpuDriverEpDescriptorGuid;
+
 //
 // Private copy of the MM system table for future use
 //
@@ -74,6 +79,7 @@ PiMmStandloneArmTfCpuDriverInitialize (
   IN EFI_SMM_SYSTEM_TABLE2   *SystemTable  // not actual systemtable
   )
 {
+  ARM_TF_CPU_DRIVER_EP_DESCRIPTOR *CpuDriverEntryPointDesc;
   EFI_CONFIGURATION_TABLE         *ConfigurationTable;
   MP_INFORMATION_HOB_DATA         *MpInformationHobData;
   EFI_SMRAM_DESCRIPTOR            *NsCommBufSmramRange;
@@ -137,6 +143,24 @@ PiMmStandloneArmTfCpuDriverInitialize (
   }
 
   HobStart = ConfigurationTable[Index].VendorTable;
+
+  //
+  // Locate the HOB with the buffer to populate the entry point of this driver
+  //
+  Status = GetGuidedHobData (
+            HobStart,
+            &gEfiArmTfCpuDriverEpDescriptorGuid,
+            (VOID **) &CpuDriverEntryPointDesc);
+  if (EFI_ERROR(Status)) {
+    DEBUG ((EFI_D_INFO, "ArmTfCpuDriverEpDesc HOB data extraction failed - 0x%x\n", Status));
+    return Status;
+  }
+
+  // Share the entry point of the CPU driver
+  DEBUG ((EFI_D_INFO, "Sharing Cpu Driver EP *0x%lx = 0x%lx\n",
+    (UINT64) CpuDriverEntryPointDesc->ArmTfCpuDriverEpPtr,
+    (UINT64) PiMmStandloneArmTfCpuDriverEntry));
+  *(CpuDriverEntryPointDesc->ArmTfCpuDriverEpPtr) = PiMmStandloneArmTfCpuDriverEntry;
 
   // Find the descriptor that contains the whereabouts of the buffer for
   // communication with the Normal world.

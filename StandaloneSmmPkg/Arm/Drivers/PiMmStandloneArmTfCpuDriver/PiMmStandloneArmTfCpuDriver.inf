@@ -58,6 +58,7 @@
   gZeroGuid
   gMpInformationHobGuid
   gEfiStandaloneMmNonSecureBufferGuid
+  gEfiArmTfCpuDriverEpDescriptorGuid
 
 [Depex]
   TRUE
