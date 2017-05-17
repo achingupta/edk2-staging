@@ -2,6 +2,7 @@
   Report Status Code Library for SMM Phase.
 
   Copyright (c) 2009 - 2010, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2017, ARM Ltd. All rights reserved.<BR>
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -24,6 +25,7 @@
 #include <Guid/StatusCodeDataTypeDebug.h>
 #include <Protocol/SmmStatusCode.h>
 
+extern EFI_SMM_SYSTEM_TABLE2   gSmmCoreSmst;
 EFI_SMM_REPORT_STATUS_CODE     mReportStatusCode = NULL;
 EFI_SMM_STATUS_CODE_PROTOCOL   *mStatusCodeProtocol = NULL;
 
@@ -42,7 +44,7 @@ InternalGetReportStatusCode (
 {
   EFI_STATUS                    Status;
 
-  Status = gSmst->SmmLocateProtocol (&gEfiSmmStatusCodeProtocolGuid, NULL, (VOID**)&mStatusCodeProtocol);
+  Status = gSmmCoreSmst.SmmLocateProtocol (&gEfiSmmStatusCodeProtocolGuid, NULL, (VOID**)&mStatusCodeProtocol);
   if (!EFI_ERROR (Status) && mStatusCodeProtocol != NULL) {
     return mStatusCodeProtocol->ReportStatusCode;
   }
