@@ -1,6 +1,6 @@
 /** @file
 *
-*  Copyright (c) 2012-2016, ARM Limited. All rights reserved.
+*  Copyright (c) 2012-2017, ARM Limited. All rights reserved.
 *
 *  This program and the accompanying materials
 *  are licensed and made available under the terms and conditions of the BSD License
@@ -45,25 +45,37 @@
  * Management Mode (MM) calls cover a subset of the Standard Service Call range.
  * The list below is not exhaustive.
  */
-#define ARM_SMC_ID_MM_COMMUNICATE_AARCH32          0x84000040
-#define ARM_SMC_ID_MM_EVENT_REGISTER_AARCH32       0x84000041
-#define ARM_SMC_ID_MM_EVENT_UNREGISTER_AARCH32     0x84000042
-#define ARM_SMC_ID_MM_EVENT_GET_CONTEXT_AARCH32    0x84000043
-#define ARM_SMC_ID_MM_EVENT_MAP_MEMORY_AARCH32     0x84000044
-#define ARM_SMC_ID_MM_EVENT_UNMAP_MEMORY_AARCH32   0x84000045
-#define ARM_SMC_ID_MM_EVENT_COMPLETE_AARCH32       0x84000046
-#define ARM_SMC_ID_MM_INIT_COMPLETE_AARCH32        0x84000047
-#define ARM_SMC_ID_MM_GET_NS_BUFFER_AARCH32        0x84000048
+#define ARM_SMC_ID_MM_VERSION_AARCH32              0x84000040
+#define ARM_SMC_ID_MM_VERSION_AARCH64              0xC4000040
 
-#define ARM_SMC_ID_MM_COMMUNICATE_AARCH64          0xC4000040    // Request service from secure standalone MM environment
-#define ARM_SMC_ID_MM_EVENT_REGISTER_AARCH64       0xC4000041    // Register secure standalone MM event handler with privileged secure EL
-#define ARM_SMC_ID_MM_EVENT_UNREGISTER_AARCH64     0xC4000042    // Unegister secure standalone MM event handler with privileged secure EL
-#define ARM_SMC_ID_MM_EVENT_GET_CONTEXT_AARCH64    0xC4000043    // Request context information for MM event from privileged secure EL
-#define ARM_SMC_ID_MM_EVENT_MAP_MEMORY_AARCH64     0xC4000044    // Request privileged secure EL to map memory range
-#define ARM_SMC_ID_MM_EVENT_UNMAP_MEMORY_AARCH64   0xC4000045    // Request privileged secure EL to unmap memory range
-#define ARM_SMC_ID_MM_EVENT_COMPLETE_AARCH64       0xC4000046    // Signal completion of MM event handling to privileged secure EL
-#define ARM_SMC_ID_MM_INIT_COMPLETE_AARCH64        0xC4000047    // Signal completion of MM Foundation initialisation to privileged secure EL
-#define ARM_SMC_ID_MM_GET_NS_BUFFER_AARCH64        0xC4000048    // Request extents of buffer for communication with secure MM environment
+// Request service from secure standalone MM environment
+#define ARM_SMC_ID_MM_COMMUNICATE_AARCH32          0x84000041
+#define ARM_SMC_ID_MM_COMMUNICATE_AARCH64          0xC4000041
+
+/*
+ * SVC IDs to allow the MM secure partition to initialise itself, handle
+ * delegated events and request the Secure partition manager to perform
+ * privileged operations on its behalf.
+ */
+#define ARM_SVC_ID_SPM_VERSION_AARCH64             0xC4000060
+#define ARM_SVC_ID_SP_EVENT_COMPLETE_AARCH64       0xC4000061
+#define ARM_SVC_ID_SP_GET_MEM_ATTRIBUTES_AARCH64   0xC4000064
+#define ARM_SVC_ID_SP_SET_MEM_ATTRIBUTES_AARCH64   0xC4000065
+
+#define SET_MEM_ATTR_DATA_PERM_MASK		   0x3
+#define SET_MEM_ATTR_DATA_PERM_SHIFT		   0
+#define SET_MEM_ATTR_DATA_PERM_NO_ACCESS	   0
+#define SET_MEM_ATTR_DATA_PERM_RW		   1
+#define SET_MEM_ATTR_DATA_PERM_RO		   3
+
+#define SET_MEM_ATTR_CODE_PERM_MASK		   0x1
+#define SET_MEM_ATTR_CODE_PERM_SHIFT		   2
+#define SET_MEM_ATTR_CODE_PERM_X		   0
+#define SET_MEM_ATTR_CODE_PERM_XN		   1
+
+#define SET_MEM_ATTR_MAKE_PERM_REQUEST(d_perm, c_perm)	             		      \
+	((((c_perm) & SET_MEM_ATTR_CODE_PERM_MASK) << SET_MEM_ATTR_CODE_PERM_SHIFT) | \
+	 (((d_perm) & SET_MEM_ATTR_DATA_PERM_MASK) << SET_MEM_ATTR_DATA_PERM_SHIFT))
 
 /* MM return error codes */
 #define ARM_SMC_MM_RET_SUCCESS	            0
