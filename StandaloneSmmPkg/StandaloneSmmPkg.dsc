@@ -156,6 +156,7 @@
 
 [LibraryClasses.AARCH64.SMM_CORE_STANDALONE]
   PeCoffExtraActionLib|StandaloneSmmPkg/Arm/Library/PermissionsPeCoffExtraActionLib/PermissionsPeCoffExtraActionLib.inf
+  HobLib|StandaloneSmmPkg/Arm/Library/StandaloneSmmCoreHobLib/StandaloneSmmCoreHobLib.inf
 
 [LibraryClasses.common.SMM_STANDALONE]
   StandaloneSmmDriverEntryPoint|StandaloneSmmPkg/Library/StandaloneSmmDriverEntryPoint/StandaloneSmmDriverEntryPoint.inf
