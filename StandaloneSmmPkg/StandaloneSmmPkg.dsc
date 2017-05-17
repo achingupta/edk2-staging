@@ -149,7 +149,6 @@
 
 [LibraryClasses.common.SMM_CORE_STANDALONE]
   SmmCoreStandaloneEntryPoint|StandaloneSmmPkg/Library/StandaloneSmmCoreEntryPoint/StandaloneSmmCoreEntryPoint.inf
-  SmmServicesTableLib|StandaloneSmmPkg/Library/StandaloneSmmCoreSmmServicesTableLib/StandaloneSmmCoreSmmServicesTableLib.inf
   SmmMemLib|StandaloneSmmPkg/Library/StandaloneSmmMemLib/StandaloneSmmMemLib.inf
   MemoryAllocationLib|StandaloneSmmPkg/Library/StandaloneSmmCoreMemoryAllocationLib/StandaloneSmmCoreMemoryAllocationLib.inf
   HobLib|StandaloneSmmPkg/Library/StandaloneSmmHobLib/StandaloneSmmHobLib.inf
@@ -158,6 +157,9 @@
   PeCoffExtraActionLib|StandaloneSmmPkg/Arm/Library/PermissionsPeCoffExtraActionLib/PermissionsPeCoffExtraActionLib.inf
   HobLib|StandaloneSmmPkg/Arm/Library/StandaloneSmmCoreHobLib/StandaloneSmmCoreHobLib.inf
   SmmCoreStandaloneEntryPoint|StandaloneSmmPkg/Arm/Library/StandaloneSmmCoreSecEntryPoint/StandaloneSmmCoreSecEntryPoint.inf
+
+[LibraryClasses.IA32.SMM_CORE_STANDALONE]
+  SmmServicesTableLib|StandaloneSmmPkg/Library/StandaloneSmmCoreSmmServicesTableLib/StandaloneSmmCoreSmmServicesTableLib.inf
 
 [LibraryClasses.common.SMM_STANDALONE]
   StandaloneSmmDriverEntryPoint|StandaloneSmmPkg/Library/StandaloneSmmDriverEntryPoint/StandaloneSmmDriverEntryPoint.inf
