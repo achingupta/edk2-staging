@@ -57,6 +57,7 @@
   gEfiSmmPeiSmramMemoryReserveGuid
   gZeroGuid
   gMpInformationHobGuid
+  gEfiStandaloneMmNonSecureBufferGuid
 
 [Depex]
   TRUE

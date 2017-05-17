@@ -17,7 +17,7 @@
 
 #include <Base.h>
 #include <Pi/PiSmmCis.h>
-
+#include <Arm/Include/Library/StandaloneSmmCoreSecEntryPoint.h>
 #include <Library/DebugLib.h>
 #include <Library/ArmSvcLib.h>
 #include <Library/ArmLib.h>
@@ -32,10 +32,9 @@
 
 #include "PiMmStandloneArmTfCpuDriver.h"
 
-// TODO: Non standard flag defined by ARM TF to mark the SMRAM descriptor that
-// contains the extents of the buffer to be used for communication with the
-// normal world
-#define EFI_SECURE_NS_MEM             0x00000080
+// GUID to identify HOB with whereabouts of communication buffer with Normal
+// World
+extern EFI_GUID gEfiStandaloneMmNonSecureBufferGuid;
 
 //
 // Private copy of the MM system table for future use
@@ -75,13 +74,11 @@ PiMmStandloneArmTfCpuDriverInitialize (
   IN EFI_SMM_SYSTEM_TABLE2   *SystemTable  // not actual systemtable
   )
 {
-  EFI_SMRAM_HOB_DESCRIPTOR_BLOCK  *SmramRangesHobData;
   EFI_CONFIGURATION_TABLE         *ConfigurationTable;
   MP_INFORMATION_HOB_DATA         *MpInformationHobData;
-  EFI_SMRAM_DESCRIPTOR            *SmramRanges;
+  EFI_SMRAM_DESCRIPTOR            *NsCommBufSmramRange;
   EFI_STATUS                       Status;
   EFI_HANDLE                       DispatchHandle;
-  UINT32                           SmramRangeCount;
   UINT32                           MpInfoSize;
   UINTN                            Index;
   UINTN                            ArraySize;
@@ -141,47 +138,22 @@ PiMmStandloneArmTfCpuDriverInitialize (
 
   HobStart = ConfigurationTable[Index].VendorTable;
 
-  //
-  // Extract the SMRAM ranges from the SMRAM descriptor HOB
-  //
-  Status = GetGuidedHobData (HobStart,
-			     &gEfiSmmPeiSmramMemoryReserveGuid,
-			     (VOID **) &SmramRangesHobData);
+  // Find the descriptor that contains the whereabouts of the buffer for
+  // communication with the Normal world.
+  Status = GetGuidedHobData (
+            HobStart,
+            &gEfiStandaloneMmNonSecureBufferGuid,
+            (VOID **) &NsCommBufSmramRange);
   if (EFI_ERROR(Status)) {
-    DEBUG ((EFI_D_INFO, "SmramRangesHobData extraction failed - 0x%x\n", Status));
+    DEBUG ((EFI_D_INFO, "NsCommBufSmramRange HOB data extraction failed - 0x%x\n", Status));
     return Status;
   }
 
-  SmramRanges = SmramRangesHobData->Descriptor;
-  SmramRangeCount = SmramRangesHobData->NumberOfSmmReservedRegions;
-  ASSERT (SmramRanges);
-  ASSERT (SmramRangeCount);
+  DEBUG ((EFI_D_INFO, "mNsCommBuffer.PhysicalStart - 0x%lx\n", (UINT64) NsCommBufSmramRange->PhysicalStart));
+  DEBUG ((EFI_D_INFO, "mNsCommBuffer.PhysicalSize - 0x%lx\n", (UINT64) NsCommBufSmramRange->PhysicalSize));
 
-  DEBUG ((EFI_D_INFO, "SmramRangeCount - 0x%x\n", SmramRangeCount));
-  for (Index = 0; Index < SmramRangeCount; Index++) {
-    DEBUG ((EFI_D_INFO, "SmramRanges[%d]: 0x%016lx - 0x%lx - 0x%lx\n", Index,
-	    SmramRanges[Index].CpuStart,
-	    SmramRanges[Index].PhysicalSize,
-	    SmramRanges[Index].RegionState));
-  }
-
-  // Find the descriptor that contains the whereabouts of the buffer for
-  // communication with the Normal world.
-  for (Index = 0; Index < SmramRangeCount; Index++) {
-     if (SmramRanges[Index].RegionState & EFI_SECURE_NS_MEM) {
-	     break;
-     }
-  }
-
-  DEBUG ((EFI_D_INFO, "mNsCommBuffer SmramRangeindex %d\n", Index));
-
-  if (Index >= SmramRangeCount)
-    return EFI_OUT_OF_RESOURCES;
-
-  CopyMem(&mNsCommBuffer, &SmramRanges[Index], sizeof(EFI_SMRAM_DESCRIPTOR));
-  DEBUG ((EFI_D_INFO, "mNsCommBuffer: 0x%016lx - 0x%lx\n",
-	  mNsCommBuffer.CpuStart,
-	  mNsCommBuffer.PhysicalSize));
+  CopyMem(&mNsCommBuffer, NsCommBufSmramRange, sizeof(EFI_SMRAM_DESCRIPTOR));
+  DEBUG ((EFI_D_INFO, "mNsCommBuffer: 0x%016lx - 0x%lx\n", mNsCommBuffer.CpuStart, mNsCommBuffer.PhysicalSize));
 
   //
   // Extract the MP information from the Hoblist
