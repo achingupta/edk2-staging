@@ -154,6 +154,9 @@
   MemoryAllocationLib|StandaloneSmmPkg/Library/StandaloneSmmCoreMemoryAllocationLib/StandaloneSmmCoreMemoryAllocationLib.inf
   HobLib|StandaloneSmmPkg/Library/StandaloneSmmHobLib/StandaloneSmmHobLib.inf
 
+[LibraryClasses.AARCH64.SMM_CORE_STANDALONE]
+  PeCoffExtraActionLib|StandaloneSmmPkg/Arm/Library/PermissionsPeCoffExtraActionLib/PermissionsPeCoffExtraActionLib.inf
+
 [LibraryClasses.common.SMM_STANDALONE]
   StandaloneSmmDriverEntryPoint|StandaloneSmmPkg/Library/StandaloneSmmDriverEntryPoint/StandaloneSmmDriverEntryPoint.inf
   SmmServicesTableLib|StandaloneSmmPkg/Library/StandaloneSmmServicesTableLib/StandaloneSmmServicesTableLib.inf
