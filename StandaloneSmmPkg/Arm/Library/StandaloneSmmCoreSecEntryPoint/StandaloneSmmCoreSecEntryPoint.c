@@ -32,6 +32,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <IndustryStandard/ArmStdSmc.h>
 
+PI_MM_ARM_TF_CPU_DRIVER_ENTRYPOINT      CpuDriverEntryPoint = NULL;
+
 /**
   Retrieve a pointer to and print the boot information passed by privileged
   secure firmware
@@ -79,7 +81,39 @@ GetAndPrintBootinformation (
   return PayloadBootInfo;
 }
 
+VOID
+EFIAPI
+DelegatedEventLoop (
+  IN ARM_SVC_ARGS *EventCompleteSvcArgs
+  )
+{
+  EFI_STATUS Status;
+
+  while(TRUE) {
+    ArmCallSvc(EventCompleteSvcArgs);
+
+    DEBUG ((EFI_D_INFO, "Received delegated event\n"));
+    DEBUG ((EFI_D_INFO, "X0 :  0x%x\n", (UINT32) EventCompleteSvcArgs->Arg0));
+    DEBUG ((EFI_D_INFO, "X1 :  0x%x\n", (UINT32) EventCompleteSvcArgs->Arg1));
+    DEBUG ((EFI_D_INFO, "X2 :  0x%x\n", (UINT32) EventCompleteSvcArgs->Arg2));
+    DEBUG ((EFI_D_INFO, "X3 :  0x%x\n", (UINT32) EventCompleteSvcArgs->Arg3));
+
+    Status = CpuDriverEntryPoint(
+      EventCompleteSvcArgs->Arg0,
+      EventCompleteSvcArgs->Arg3,
+      EventCompleteSvcArgs->Arg1);
+    if (EFI_ERROR(Status)) {
+      DEBUG((EFI_D_ERROR, "Failed delegated event 0x%x, Status 0x%x\n",
+        EventCompleteSvcArgs->Arg0, Status));
+    }
+
+    EventCompleteSvcArgs->Arg0 = ARM_SVC_ID_SP_EVENT_COMPLETE_AARCH64;
+    EventCompleteSvcArgs->Arg1 = Status;
+  }
+}
+
 /**
+
   The entry point of Standalone MM Foundation.
 
   @param  HobStart  The pointer to the beginning of the HOB List.
@@ -94,7 +128,6 @@ _ModuleEntryPoint (
   IN UINT64  cookie2
   )
 {
-  PI_MM_ARM_TF_CPU_DRIVER_ENTRYPOINT      CpuDriverEntryPoint = NULL;
   PE_COFF_LOADER_IMAGE_CONTEXT            ImageContext;
   EFI_SPM_PAYLOAD_BOOT_INFO               *PayloadBootInfo;
   ARM_SVC_ARGS                            InitMmFoundationSvcArgs = {0};
@@ -159,21 +192,6 @@ _ModuleEntryPoint (
 finish:
   InitMmFoundationSvcArgs.Arg0 = ARM_SVC_ID_SP_EVENT_COMPLETE_AARCH64;
   InitMmFoundationSvcArgs.Arg1 = Status;
-  ArmCallSvc(&InitMmFoundationSvcArgs);
-
-  DEBUG ((EFI_D_INFO, "Received delegated event\n"));
-  DEBUG ((EFI_D_INFO, "X0 :  0x%x\n", (UINT32) InitMmFoundationSvcArgs.Arg0));
-  DEBUG ((EFI_D_INFO, "X1 :  0x%x\n", (UINT32) InitMmFoundationSvcArgs.Arg1));
-  DEBUG ((EFI_D_INFO, "X2 :  0x%x\n", (UINT32) InitMmFoundationSvcArgs.Arg2));
-  DEBUG ((EFI_D_INFO, "X3 :  0x%x\n", (UINT32) InitMmFoundationSvcArgs.Arg3));
-
-  Status = CpuDriverEntryPoint(
-    InitMmFoundationSvcArgs.Arg0,
-    InitMmFoundationSvcArgs.Arg3,
-    InitMmFoundationSvcArgs.Arg1);
-  if (EFI_ERROR(Status)) {
-    DEBUG((EFI_D_ERROR, "Failed delegated event 0x%x, Status 0x%x\n", InitMmFoundationSvcArgs.Arg0, Status));
-  }
-
-  goto finish;
+  DelegatedEventLoop(&InitMmFoundationSvcArgs);
+  ASSERT_EFI_ERROR(0);
 }
