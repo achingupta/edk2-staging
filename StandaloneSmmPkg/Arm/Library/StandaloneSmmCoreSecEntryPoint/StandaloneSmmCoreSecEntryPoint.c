@@ -81,6 +81,43 @@ GetAndPrintBootinformation (
   return PayloadBootInfo;
 }
 
+/**
+  Retrieve a pointer to and print the boot information passed by privileged
+  secure firmware for a secondary CPU
+
+  @param  SharedBufAddress The pointer memory shared with privileged firmware
+
+**/
+EFI_SPM_PAYLOAD_WARM_BOOT_INFO *
+GetAndPrintWarmBootinformation (
+  IN VOID                      *SharedBufAddress
+  )
+{
+  EFI_SPM_PAYLOAD_WARM_BOOT_INFO *PayloadBootInfo;
+  EFI_SPM_PAYLOAD_CPU_INFO       *PayloadCpuInfo;
+
+  PayloadBootInfo = (EFI_SPM_PAYLOAD_WARM_BOOT_INFO *) SharedBufAddress;
+
+  DEBUG((EFI_D_INFO, "SpStackBase         - 0x%lx\n",
+    PayloadBootInfo->SpStackBase));
+  DEBUG((EFI_D_INFO, "SpSharedBufBase     - 0x%lx\n",
+    PayloadBootInfo->SpSharedBufBase));
+  DEBUG((EFI_D_INFO, "SpPcpuStackSize     - 0x%x\n",
+    PayloadBootInfo->SpPcpuStackSize));
+  DEBUG((EFI_D_INFO, "SpPcpuSharedBufSize - 0x%x\n",
+    PayloadBootInfo->SpPcpuSharedBufSize));
+  DEBUG((EFI_D_INFO, "CpuInfo             - 0x%p\n",
+    PayloadBootInfo->CpuInfo));
+
+  PayloadCpuInfo = (EFI_SPM_PAYLOAD_CPU_INFO *) &(PayloadBootInfo->CpuInfo);
+
+  DEBUG((EFI_D_INFO, "Mpidr               - 0x%lx\n", PayloadCpuInfo->Mpidr));
+  DEBUG((EFI_D_INFO, "LinearId            - 0x%x\n", PayloadCpuInfo->LinearId));
+  DEBUG((EFI_D_INFO, "Flags               - 0x%x\n", PayloadCpuInfo->Flags));
+
+  return PayloadBootInfo;
+}
+
 VOID
 EFIAPI
 DelegatedEventLoop (
@@ -113,7 +150,33 @@ DelegatedEventLoop (
 }
 
 /**
+  The entry point for secondary CPUs into Standalone MM Foundation.
 
+  @param  HobStart  The pointer to the beginning of the HOB List.
+
+**/
+VOID
+EFIAPI
+SecondaryEntryPoint (
+  IN VOID    *SharedBufAddress,
+  IN UINT64  SharedBufSize,
+  IN UINT64  cookie1,
+  IN UINT64  cookie2
+  )
+{
+  EFI_SPM_PAYLOAD_WARM_BOOT_INFO          *PayloadBootInfo;
+  ARM_SVC_ARGS                            InitMmFoundationSvcArgs = {0};
+
+  PayloadBootInfo = GetAndPrintWarmBootinformation(SharedBufAddress);
+  ASSERT_EFI_ERROR (PayloadBootInfo);
+
+  InitMmFoundationSvcArgs.Arg0 = ARM_SVC_ID_SP_EVENT_COMPLETE_AARCH64;
+  InitMmFoundationSvcArgs.Arg1 = 0;
+  DelegatedEventLoop(&InitMmFoundationSvcArgs);
+  ASSERT_EFI_ERROR(0);
+}
+
+/**
   The entry point of Standalone MM Foundation.
 
   @param  HobStart  The pointer to the beginning of the HOB List.
@@ -192,6 +255,7 @@ _ModuleEntryPoint (
 finish:
   InitMmFoundationSvcArgs.Arg0 = ARM_SVC_ID_SP_EVENT_COMPLETE_AARCH64;
   InitMmFoundationSvcArgs.Arg1 = Status;
+  InitMmFoundationSvcArgs.Arg2 = (UINT64) SecondaryEntryPoint;
   DelegatedEventLoop(&InitMmFoundationSvcArgs);
   ASSERT_EFI_ERROR(0);
 }

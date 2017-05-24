@@ -30,8 +30,8 @@ EFI_STATUS
   );
 
 typedef struct {
-  UINT8 Type;       /* type of the structure */
-  UINT8 Version;    /* version of this structure */
+  UINT8  Type;       /* type of the structure */
+  UINT8  Version;    /* version of this structure */
   UINT16 Size;      /* size of this structure in bytes */
   UINT32 Attr;      /* attributes: unused bits SBZ */
 } EFI_PARAM_HEADER;
@@ -60,6 +60,16 @@ typedef struct {
   UINT32                   NumCpus;
   EFI_SPM_PAYLOAD_CPU_INFO *CpuInfo;
 } EFI_SPM_PAYLOAD_BOOT_INFO;
+
+typedef struct {
+  EFI_PARAM_HEADER          h;
+  UINT64                    SpStackBase;
+  UINT64                    SpSharedBufBase;
+  UINT32                    SpPcpuStackSize;
+  UINT32                    SpPcpuSharedBufSize;
+  EFI_SPM_PAYLOAD_CPU_INFO  CpuInfo;
+} EFI_SPM_PAYLOAD_WARM_BOOT_INFO;
+
 
 typedef
 EFI_STATUS
