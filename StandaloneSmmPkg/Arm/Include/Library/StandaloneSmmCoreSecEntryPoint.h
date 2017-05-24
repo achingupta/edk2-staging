@@ -43,21 +43,21 @@ typedef struct {
 } EFI_SPM_PAYLOAD_CPU_INFO;
 
 typedef struct {
-  EFI_PARAM_HEADER Header;
-  UINT64 SpMemBase;
-  UINT64 SpMemLimit;
-  UINT64 SpImageBase;
-  UINT64 SpStackBase;
-  UINT64 SpHeapBase;
-  UINT64 SpNsCommBufBase;
-  UINT64 SpSharedBufBase;
-  UINT32 SpImageSize;
-  UINT32 SpPcpuStackSize;
-  UINT32 SpHeapSize;
-  UINT32 SpNsCommBufSize;
-  UINT32 SpSharedBufSize;
-  UINT32 NumSpMemRegions;
-  UINT32 NumCpus;
+  EFI_PARAM_HEADER         Header;
+  UINT64                   SpMemBase;
+  UINT64                   SpMemLimit;
+  UINT64                   SpImageBase;
+  UINT64                   SpStackBase;
+  UINT64                   SpHeapBase;
+  UINT64                   SpNsCommBufBase;
+  UINT64                   SpSharedBufBase;
+  UINT32                   SpImageSize;
+  UINT32                   SpPcpuStackSize;
+  UINT32                   SpHeapSize;
+  UINT32                   SpNsCommBufSize;
+  UINT32                   SpPcpuSharedBufSize;
+  UINT32                   NumSpMemRegions;
+  UINT32                   NumCpus;
   EFI_SPM_PAYLOAD_CPU_INFO *CpuInfo;
 } EFI_SPM_PAYLOAD_BOOT_INFO;
 

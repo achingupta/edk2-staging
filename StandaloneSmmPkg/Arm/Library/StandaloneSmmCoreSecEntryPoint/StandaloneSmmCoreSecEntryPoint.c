@@ -63,7 +63,7 @@ GetAndPrintBootinformation (
   DEBUG((EFI_D_INFO, "SpPcpuStackSize - 0x%x\n", PayloadBootInfo->SpPcpuStackSize));
   DEBUG((EFI_D_INFO, "SpHeapSize      - 0x%x\n", PayloadBootInfo->SpHeapSize));
   DEBUG((EFI_D_INFO, "SpNsCommBufSize - 0x%x\n", PayloadBootInfo->SpNsCommBufSize));
-  DEBUG((EFI_D_INFO, "SpSharedBufSize - 0x%x\n", PayloadBootInfo->SpSharedBufSize));
+  DEBUG((EFI_D_INFO, "SpPcpuSharedBufSize - 0x%x\n", PayloadBootInfo->SpPcpuSharedBufSize));
 
   DEBUG((EFI_D_INFO, "NumCpus         - 0x%x\n", PayloadBootInfo->NumCpus));
   DEBUG((EFI_D_INFO, "CpuInfo         - 0x%p\n", PayloadBootInfo->CpuInfo));
