@@ -41,16 +41,16 @@ PI_MM_ARM_TF_CPU_DRIVER_ENTRYPOINT      CpuDriverEntryPoint = NULL;
   @param  SharedBufAddress The pointer memory shared with privileged firmware
 
 **/
-EFI_SPM_PAYLOAD_BOOT_INFO *
+EFI_SECURE_PARTITION_BOOT_INFO *
 GetAndPrintBootinformation (
   IN VOID                      *SharedBufAddress
 )
 {
-  EFI_SPM_PAYLOAD_BOOT_INFO *PayloadBootInfo;
-  EFI_SPM_PAYLOAD_CPU_INFO  *PayloadCpuInfo;
-  UINTN                     Index;
+  EFI_SECURE_PARTITION_BOOT_INFO *PayloadBootInfo;
+  EFI_SECURE_PARTITION_CPU_INFO  *PayloadCpuInfo;
+  UINTN                          Index;
 
-  PayloadBootInfo = (EFI_SPM_PAYLOAD_BOOT_INFO *) SharedBufAddress;
+  PayloadBootInfo = (EFI_SECURE_PARTITION_BOOT_INFO *) SharedBufAddress;
 
   DEBUG((EFI_D_INFO, "NumSpMemRegions - 0x%x\n", PayloadBootInfo->NumSpMemRegions));
   DEBUG((EFI_D_INFO, "SpMemBase       - 0x%lx\n", PayloadBootInfo->SpMemBase));
@@ -70,7 +70,7 @@ GetAndPrintBootinformation (
   DEBUG((EFI_D_INFO, "NumCpus         - 0x%x\n", PayloadBootInfo->NumCpus));
   DEBUG((EFI_D_INFO, "CpuInfo         - 0x%p\n", PayloadBootInfo->CpuInfo));
 
-  PayloadCpuInfo = (EFI_SPM_PAYLOAD_CPU_INFO *) PayloadBootInfo->CpuInfo;
+  PayloadCpuInfo = (EFI_SECURE_PARTITION_CPU_INFO *) PayloadBootInfo->CpuInfo;
 
   for (Index = 0; Index < PayloadBootInfo->NumCpus; Index++) {
     DEBUG((EFI_D_INFO, "Mpidr           - 0x%lx\n", PayloadCpuInfo[Index].Mpidr));
@@ -88,15 +88,15 @@ GetAndPrintBootinformation (
   @param  SharedBufAddress The pointer memory shared with privileged firmware
 
 **/
-EFI_SPM_PAYLOAD_WARM_BOOT_INFO *
+EFI_SECURE_PARTITION_WARM_BOOT_INFO *
 GetAndPrintWarmBootinformation (
   IN VOID                      *SharedBufAddress
   )
 {
-  EFI_SPM_PAYLOAD_WARM_BOOT_INFO *PayloadBootInfo;
-  EFI_SPM_PAYLOAD_CPU_INFO       *PayloadCpuInfo;
+  EFI_SECURE_PARTITION_WARM_BOOT_INFO *PayloadBootInfo;
+  EFI_SECURE_PARTITION_CPU_INFO       *PayloadCpuInfo;
 
-  PayloadBootInfo = (EFI_SPM_PAYLOAD_WARM_BOOT_INFO *) SharedBufAddress;
+  PayloadBootInfo = (EFI_SECURE_PARTITION_WARM_BOOT_INFO *) SharedBufAddress;
 
   DEBUG((EFI_D_INFO, "SpStackBase         - 0x%lx\n",
     PayloadBootInfo->SpStackBase));
@@ -109,7 +109,7 @@ GetAndPrintWarmBootinformation (
   DEBUG((EFI_D_INFO, "CpuInfo             - 0x%p\n",
     PayloadBootInfo->CpuInfo));
 
-  PayloadCpuInfo = (EFI_SPM_PAYLOAD_CPU_INFO *) &(PayloadBootInfo->CpuInfo);
+  PayloadCpuInfo = (EFI_SECURE_PARTITION_CPU_INFO *) &(PayloadBootInfo->CpuInfo);
 
   DEBUG((EFI_D_INFO, "Mpidr               - 0x%lx\n", PayloadCpuInfo->Mpidr));
   DEBUG((EFI_D_INFO, "LinearId            - 0x%x\n", PayloadCpuInfo->LinearId));
@@ -164,7 +164,7 @@ SecondaryEntryPoint (
   IN UINT64  cookie2
   )
 {
-  EFI_SPM_PAYLOAD_WARM_BOOT_INFO          *PayloadBootInfo;
+  EFI_SECURE_PARTITION_WARM_BOOT_INFO     *PayloadBootInfo;
   ARM_SVC_ARGS                            InitMmFoundationSvcArgs = {0};
 
   PayloadBootInfo = GetAndPrintWarmBootinformation(SharedBufAddress);
@@ -192,7 +192,7 @@ _ModuleEntryPoint (
   )
 {
   PE_COFF_LOADER_IMAGE_CONTEXT            ImageContext;
-  EFI_SPM_PAYLOAD_BOOT_INFO               *PayloadBootInfo;
+  EFI_SECURE_PARTITION_BOOT_INFO          *PayloadBootInfo;
   ARM_SVC_ARGS                            InitMmFoundationSvcArgs = {0};
   EFI_STATUS                              Status;
   UINT32                                  SectionHeaderOffset;

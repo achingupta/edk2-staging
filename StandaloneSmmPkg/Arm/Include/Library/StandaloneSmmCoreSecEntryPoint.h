@@ -40,35 +40,35 @@ typedef struct {
   UINT64 Mpidr;
   UINT32 LinearId;
   UINT32 Flags;
-} EFI_SPM_PAYLOAD_CPU_INFO;
+} EFI_SECURE_PARTITION_CPU_INFO;
 
 typedef struct {
-  EFI_PARAM_HEADER         Header;
-  UINT64                   SpMemBase;
-  UINT64                   SpMemLimit;
-  UINT64                   SpImageBase;
-  UINT64                   SpStackBase;
-  UINT64                   SpHeapBase;
-  UINT64                   SpNsCommBufBase;
-  UINT64                   SpSharedBufBase;
-  UINT32                   SpImageSize;
-  UINT32                   SpPcpuStackSize;
-  UINT32                   SpHeapSize;
-  UINT32                   SpNsCommBufSize;
-  UINT32                   SpPcpuSharedBufSize;
-  UINT32                   NumSpMemRegions;
-  UINT32                   NumCpus;
-  EFI_SPM_PAYLOAD_CPU_INFO *CpuInfo;
-} EFI_SPM_PAYLOAD_BOOT_INFO;
+  EFI_PARAM_HEADER              Header;
+  UINT64                        SpMemBase;
+  UINT64                        SpMemLimit;
+  UINT64                        SpImageBase;
+  UINT64                        SpStackBase;
+  UINT64                        SpHeapBase;
+  UINT64                        SpNsCommBufBase;
+  UINT64                        SpSharedBufBase;
+  UINT32                        SpImageSize;
+  UINT32                        SpPcpuStackSize;
+  UINT32                        SpHeapSize;
+  UINT32                        SpNsCommBufSize;
+  UINT32                        SpPcpuSharedBufSize;
+  UINT32                        NumSpMemRegions;
+  UINT32                        NumCpus;
+  EFI_SECURE_PARTITION_CPU_INFO *CpuInfo;
+} EFI_SECURE_PARTITION_BOOT_INFO;
 
 typedef struct {
-  EFI_PARAM_HEADER          h;
-  UINT64                    SpStackBase;
-  UINT64                    SpSharedBufBase;
-  UINT32                    SpPcpuStackSize;
-  UINT32                    SpPcpuSharedBufSize;
-  EFI_SPM_PAYLOAD_CPU_INFO  CpuInfo;
-} EFI_SPM_PAYLOAD_WARM_BOOT_INFO;
+  EFI_PARAM_HEADER               h;
+  UINT64                         SpStackBase;
+  UINT64                         SpSharedBufBase;
+  UINT32                         SpPcpuStackSize;
+  UINT32                         SpPcpuSharedBufSize;
+  EFI_SECURE_PARTITION_CPU_INFO  CpuInfo;
+} EFI_SECURE_PARTITION_WARM_BOOT_INFO;
 
 
 typedef
@@ -168,7 +168,7 @@ VOID *
 EFIAPI
 CreateHobListFromBootInfo (
   IN  OUT  PI_MM_ARM_TF_CPU_DRIVER_ENTRYPOINT *CpuDriverEntryPoint,
-  IN       EFI_SPM_PAYLOAD_BOOT_INFO          *PayloadBootInfo
+  IN       EFI_SECURE_PARTITION_BOOT_INFO     *PayloadBootInfo
   );
 
 

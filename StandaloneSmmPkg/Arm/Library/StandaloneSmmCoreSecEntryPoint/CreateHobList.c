@@ -64,7 +64,7 @@ VOID *gHobList = NULL;
 VOID *
 CreateHobListFromBootInfo (
   IN  OUT  PI_MM_ARM_TF_CPU_DRIVER_ENTRYPOINT *CpuDriverEntryPoint,
-  IN       EFI_SPM_PAYLOAD_BOOT_INFO          *PayloadBootInfo
+  IN       EFI_SECURE_PARTITION_BOOT_INFO     *PayloadBootInfo
 )
 {
   EFI_HOB_HANDOFF_INFO_TABLE      *HobStart;
@@ -77,7 +77,7 @@ CreateHobListFromBootInfo (
   EFI_SMRAM_DESCRIPTOR            *NsCommBufSmramRange;
   MP_INFORMATION_HOB_DATA         *MpInformationHobData;
   EFI_PROCESSOR_INFORMATION       *ProcInfoBuffer;
-  EFI_SPM_PAYLOAD_CPU_INFO        *CpuInfo;
+  EFI_SECURE_PARTITION_CPU_INFO   *CpuInfo;
   ARM_TF_CPU_DRIVER_EP_DESCRIPTOR *CpuDriverEntryPointDesc;
 
   // Create a hoblist with a PHIT and EOH
