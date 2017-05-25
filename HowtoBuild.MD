@@ -70,8 +70,8 @@ In user preferred "work" directory, execute the following shell commands
 9. cd ../..
 10. mkdir arm-tf
 11. cd arm-tf
-12. git clone https://github.com/achingupta/arm-trusted-firmware .
-13. git checkout AArch64StandaloneMm
+12. git clone https://github.com/ARM-software/arm-trusted-firmware.git .
+13. git checkout prototypes/secure_partitions/rfc_v1
 14. cd ..
 15. mkdir uefi-tools
 16. cd uefi-tools
