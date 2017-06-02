@@ -124,239 +124,258 @@ The following subsections describe output that signifies correct establishment
 of MM communication between the secure and normal worlds.
 
 ### MM Standalone Output (FVP UART2)
-`StandaloneSmmCoreMemoryAllocationLibConstructor - 0xFC280000
-SmramRangeCount - 0x5
-SmramRanges[0]: 0x00000000FC000000 - 0x0000000000280000
-SmramRanges[1]: 0x00000000FFDF8000 - 0x0000000000008000
-SmramRanges[2]: 0x00000000FC280000 - 0x0000000000000240
-SmramRanges[3]: 0x00000000FC280240 - 0x0000000003B77DC0
-SmramRanges[4]: 0x00000000FBE00000 - 0x0000000000200000
-SmmInitializeMemoryServices
-SmmAddMemoryRegion 0 : 0x00000000FC000000 - 0x0000000000280000
-SmmAddMemoryRegion 1 : 0x00000000FFDF8000 - 0x0000000000008000
-SmmAddMemoryRegion 2 : 0x00000000FC280000 - 0x0000000000000240
-SmmAddMemoryRegion 3 : 0x00000000FC280240 - 0x0000000003B77DC0
-SmmAddMemoryRegion 4 : 0x00000000FBE00000 - 0x0000000000200000
-mSmmMemLibInternalMaximumSupportAddress = 0xFFFFFFFFF
-SmmMain - 0xFC280000
-SmramRangeCount - 0x5
-SmramRanges[0]: 0x00000000FC000000 - 0x280000
-SmramRanges[1]: 0x00000000FFDF8000 - 0x8000
-SmramRanges[2]: 0x00000000FC280000 - 0x240
-SmramRanges[3]: 0x00000000FC280240 - 0x3B77DC0
-SmramRanges[4]: 0x00000000FBE00000 - 0x200000
-mSmramRangeCount - 0x5
-mSmramRanges - 0xFFDF6E10
-BFV address - 0xFC000000
-BFV size    - 0x280000
-SmmInstallConfigurationTable For HobList
-HobSize - 0x240
-SmmHobStart - 0xFFDF6810
-SmmInstallProtocolInterface - gEfiMmHandlerStateNotificationProtocolGuid
-SmmInstallProtocolInterface: 30C8340F-4C30-41D9-BFAE-444ACB2C1F76 FC014210
-SmmRegisterProtocolNotify - SmmConfigurationSmmProtocol
-MmRegisterProtocolNotify - MmConfigurationMmProtocol
-Smm Dispatch StandaloneBfvAddress - 0xFC000000
-SmmCoreFfsFindSmmDriver - 0xFC000000
-FvIsBeingProcesssed - 0xFC000000
-Check SmmFileTypes - 0xA
-Check SmmFileTypes - 0xE
-Find PE data - 0xFC016024
-SmmAddToDriverList - 58F7A62B-6280-42A7-BC38-10535A64A92C (0xFC016024)
-SmmDispatcher
-  Drain the Scheduled Queue
-  Search DriverList for items to place on Scheduled Queue
-  DriverEntry (Discovered) - 58F7A62B-6280-42A7-BC38-10535A64A92C
-Evaluate SMM DEPEX for FFS(58F7A62B-6280-42A7-BC38-10535A64A92C)
-  TRUE
-  END
-  RESULT = TRUE
-  Drain the Scheduled Queue
-  DriverEntry (Scheduled) - 58F7A62B-6280-42A7-BC38-10535A64A92C
-SmmLoadImage - 58F7A62B-6280-42A7-BC38-10535A64A92C
-Loading SMM driver at 0x000FFDDE000 EntryPoint=0x000FFDDF000 ArmPiMmCpuTpFw.efi
-StartImage - 0xFFDDF000 (Standalone Mode)
-SmmInstallProtocolInterface: 0C109319-C149-450E-A3E3-B9BADD9DC3A4 FFDE6000
-MmConfigurationMmNotify(0C109319-C149-450E-A3E3-B9BADD9DC3A4) - FFDE6000
-MM Core registered MM Entry Point address FC001718
-SmmInstallProtocolInterface: EB346B97-975F-4A9F-8B22-F8E92BB3D569 FFDE6008
-SmramRangeCount - 0x5
-SmramRanges[0]: 0x00000000FC000000 - 0x280000 - 0x18
-SmramRanges[1]: 0x00000000FFDF8000 - 0x8000 - 0x18
-SmramRanges[2]: 0x00000000FC280000 - 0x240 - 0x18
-SmramRanges[3]: 0x00000000FC280240 - 0x3B77DC0 - 0x8
-SmramRanges[4]: 0x00000000FBE00000 - 0x200000 - 0xCFDFDFDF00000098
-mNsCommBuffer SmramRangeindex 4
-mNsCommBuffer: 0x00000000FBE00000 - 0x200000
-mMpInformationHobData: 0x0000000000000008 - 0x8
-mMpInformationHobData[0x80000000]: 0, 0, 0
-mMpInformationHobData[0x80000001]: 0, 1, 0
-mMpInformationHobData[0x80000002]: 0, 2, 0
-mMpInformationHobData[0x80000003]: 0, 3, 0
-mMpInformationHobData[0x80000100]: 0, 4, 0
-mMpInformationHobData[0x80000101]: 0, 5, 0
-mMpInformationHobData[0x80000102]: 0, 6, 0
-mMpInformationHobData[0x80000103]: 0, 7, 0
-MmiHandlerStateNotifier - GUID A37721E4-8C0B-4BCA-B5E8-E902A025514E, Handler - 0xFC001614
-, State - 0SmiHandlerRegister - GUID A37721E4-8C0B-4BCA-B5E8-E902A025514E - Status 0
-MmiHandlerStateNotifier - Unknown GUID B65694CC-09E3-4C3B-B5CD-05F44D3CDBFF, Handler - 0xFC006780
-, State - 0, Status - 14SmiHandlerRegister - GUID B65694CC-09E3-4C3B-B5CD-05F44D3CDBFF - Status 0
-MmiHandlerStateNotifier - Unknown GUID 7081E22F-CAC6-4053-9468-675782CF88E5, Handler - 0xFC0066AC
-, State - 0, Status - 14SmiHandlerRegister - GUID 7081E22F-CAC6-4053-9468-675782CF88E5 - Status 0
-MmiHandlerStateNotifier - Unknown GUID 60FF8964-E906-41D0-AFED-F241E974E08E, Handler - 0xFC001480
-, State - 0, Status - 14SmiHandlerRegister - GUID 60FF8964-E906-41D0-AFED-F241E974E08E - Status 0
-MmiHandlerStateNotifier - Unknown GUID 02CE967A-DD7E-4FFC-9EE7-810CF0470880, Handler - 0xFC001598
-, State - 0, Status - 14SmiHandlerRegister - GUID 02CE967A-DD7E-4FFC-9EE7-810CF0470880 - Status 0
-MmiHandlerStateNotifier - Unknown GUID 2A571201-4966-47F6-8B86-F31E41F32F10, Handler - 0xFC00133C
-, State - 0, Status - 14SmiHandlerRegister - GUID 2A571201-4966-47F6-8B86-F31E41F32F10 - Status 0
-MmiHandlerStateNotifier - Unknown GUID 27ABF055-B1B8-4C26-8048-748F37BAA2DF, Handler - 0xFC0013A8
-, State - 0, Status - 14SmiHandlerRegister - GUID 27ABF055-B1B8-4C26-8048-748F37BAA2DF - Status 0
-MmiHandlerStateNotifier - Unknown GUID 7CE88FB3-4BD7-4679-87A8-A8D8DEE50D2B, Handler - 0xFC001414
-, State - 0, Status - 14SmiHandlerRegister - GUID 7CE88FB3-4BD7-4679-87A8-A8D8DEE50D2B - Status 0
-SmmMain Done!`
+NumSpMemRegions - 0x6  
+SpMemBase       - 0xFF200000  
+SpMemLimit      - 0x100000000  
+SpImageBase     - 0xFF200000  
+SpStackBase     - 0xFF610000  
+SpHeapBase      - 0xFF620000  
+SpNsCommBufBase - 0xFF600000  
+SpSharedBufBase - 0xFF500000  
+SpImageSize     - 0x300000  
+SpPcpuStackSize - 0x2000  
+SpHeapSize      - 0x9E0000  
+SpNsCommBufSize - 0x10000  
+SpPcpuSharedBufSize - 0x20000  
+NumCpus         - 0x8  
+CpuInfo         - 0xFF500680  
+Mpidr           - 0x80000000  
+LinearId        - 0x0  
+Flags           - 0x1  
+Mpidr           - 0x80000001  
+LinearId        - 0x1  
+Flags           - 0x0  
+Mpidr           - 0x80000002  
+LinearId        - 0x2  
+Flags           - 0x0  
+Mpidr           - 0x80000003  
+LinearId        - 0x3  
+Flags           - 0x0  
+Mpidr           - 0x80000100  
+LinearId        - 0x4  
+Flags           - 0x0  
+Mpidr           - 0x80000101  
+LinearId        - 0x5  
+Flags           - 0x0  
+Mpidr           - 0x80000102  
+LinearId        - 0x6  
+Flags           - 0x0  
+Mpidr           - 0x80000103  
+LinearId        - 0x7  
+Flags           - 0x0  
+Found Standalone MM PE data - 0xFF201000  
+Found Standalone MM PE data - 0xFF201000  
+Standalone MM Core PE-COFF SectionHeaderOffset - 0xF60, NumberOfSections - 3  
+UpdateMmFoundationPeCoffPermissions: Section 0 of image at 0xFF201000 has 0x60000020 permissions  
+UpdateMmFoundationPeCoffPermissions: Section 0 of image at 0xFF201000 has .et name  
+UpdateMmFoundationPeCoffPermissions: Section 0 of image at 0xFF201000 has 0xFF202000 address  
+UpdateMmFoundationPeCoffPermissions: Section 0 of image at 0xFF201000 has 0x1000 data  
+UpdateMmFoundationPeCoffPermissions: Ignoring section 0 of image at 0xFF201000 with 0x60000020 permissions  
+UpdateMmFoundationPeCoffPermissions: Section 1 of image at 0xFF201000 has 0xC0000040 permissions  
+UpdateMmFoundationPeCoffPermissions: Section 1 of image at 0xFF201000 has .aa name  
+UpdateMmFoundationPeCoffPermissions: Section 1 of image at 0xFF201000 has 0xFF219000 address  
+UpdateMmFoundationPeCoffPermissions: Section 1 of image at 0xFF201000 has 0x18000 data  
+UpdateMmFoundationPeCoffPermissions: Mapping section 1 of image at 0xFF201000 with RW-XN permissions  
+UpdateMmFoundationPeCoffPermissions: Section 2 of image at 0xFF201000 has 0x42000040 permissions  
+UpdateMmFoundationPeCoffPermissions: Section 2 of image at 0xFF201000 has .eo name  
+UpdateMmFoundationPeCoffPermissions: Section 2 of image at 0xFF201000 has 0xFF21A000 address  
+UpdateMmFoundationPeCoffPermissions: Section 2 of image at 0xFF201000 has 0x19000 data  
+UpdateMmFoundationPeCoffPermissions: Mapping section 2 of image at 0xFF201000 with RO-XN permissions  
+StandaloneSmmCoreMemoryAllocationLibConstructor - 0xFF620000  
+SmramRangeCount - 0x6  
+SmramRanges[0]: 0x00000000FF200000 - 0x0000000000300000  
+SmramRanges[1]: 0x00000000FF500000 - 0x0000000000100000  
+SmramRanges[2]: 0x00000000FF600000 - 0x0000000000010000  
+SmramRanges[3]: 0x00000000FF610000 - 0x0000000000010000  
+SmramRanges[4]: 0x00000000FF620000 - 0x00000000000002C8  
+SmramRanges[5]: 0x00000000FF6202C8 - 0x00000000009DFD38  
+SmmInitializeMemoryServices  
+SmmAddMemoryRegion 0 : 0x00000000FF200000 - 0x0000000000300000  
+SmmAddMemoryRegion 1 : 0x00000000FF500000 - 0x0000000000100000  
+SmmAddMemoryRegion 2 : 0x00000000FF600000 - 0x0000000000010000  
+SmmAddMemoryRegion 3 : 0x00000000FF610000 - 0x0000000000010000  
+SmmAddMemoryRegion 4 : 0x00000000FF620000 - 0x00000000000002C8  
+SmmAddMemoryRegion 5 : 0x00000000FF6202C8 - 0x00000000009DFD38  
+mSmmMemLibInternalMaximumSupportAddress = 0xFFFFFFFFF  
+SmmMain - 0xFF620000  
+SmramRangeCount - 0x6  
+SmramRanges[0]: 0x00000000FF200000 - 0x300000  
+SmramRanges[1]: 0x00000000FF500000 - 0x100000  
+SmramRanges[2]: 0x00000000FF600000 - 0x10000  
+SmramRanges[3]: 0x00000000FF610000 - 0x10000  
+SmramRanges[4]: 0x00000000FF620000 - 0x2C8  
+SmramRanges[5]: 0x00000000FF6202C8 - 0x9DFD38  
+mSmramRangeCount - 0x6  
+mSmramRanges - 0xFFFFEE10  
+BFV address - 0xFF200000  
+BFV size    - 0x300000  
+SmmInstallConfigurationTable For HobList  
+HobSize - 0x2C8  
+SmmHobStart - 0xFFFFE810  
+SmmInstallProtocolInterface - gEfiMmHandlerStateNotificationProtocolGuid  
+SmmInstallProtocolInterface: 30C8340F-4C30-41D9-BFAE-444ACB2C1F76 FF219218  
+SmmRegisterProtocolNotify - SmmConfigurationSmmProtocol  
+MmRegisterProtocolNotify - MmConfigurationMmProtocol  
+Smm Dispatch StandaloneBfvAddress - 0xFF200000  
+SmmCoreFfsFindSmmDriver - 0xFF200000  
+FvIsBeingProcesssed - 0xFF200000  
+Check SmmFileTypes - 0xA  
+Check SmmFileTypes - 0xE  
+Find PE data - 0xFF21B024  
+SmmAddToDriverList - 58F7A62B-6280-42A7-BC38-10535A64A92C (0xFF21B024)  
+SmmDispatcher  
+  Drain the Scheduled Queue  
+  Search DriverList for items to place on Scheduled Queue  
+  DriverEntry (Discovered) - 58F7A62B-6280-42A7-BC38-10535A64A92C  
+Evaluate SMM DEPEX for FFS(58F7A62B-6280-42A7-BC38-10535A64A92C)  
+  TRUE  
+  END  
+  RESULT = TRUE  
+  Drain the Scheduled Queue  
+  DriverEntry (Scheduled) - 58F7A62B-6280-42A7-BC38-10535A64A92C  
+SmmLoadImage - 58F7A62B-6280-42A7-BC38-10535A64A92C  
+UpdatePeCoffPermissions: Mapping section 0 of image at 0xFFFE7000 with RO-XN permissions and size 0x7000  
+UpdatePeCoffPermissions: Mapping section 0 of image at 0xFFFE7000 with RO-X permissions and size 0x7000  
+UpdatePeCoffPermissions: Mapping section 1 of image at 0xFFFEE000 with RW-XN permissions and size 0x1000  
+UpdatePeCoffPermissions: Mapping section 2 of image at 0xFFFEF000 with RO-XN permissions and size 0x1000  
+Loading SMM driver at 0x000FFFE6000 EntryPoint=0x000FFFE7000 PiMmStandloneArmTfCpuDriver.efi  
+StartImage - 0xFFFE7000 (Standalone Mode)  
+SmmInstallProtocolInterface: 0C109319-C149-450E-A3E3-B9BADD9DC3A4 FFFEE008  
+MmConfigurationMmNotify(0C109319-C149-450E-A3E3-B9BADD9DC3A4) - FFFEE008  
+MM Core registered MM Entry Point address FF204DE4  
+SmmInstallProtocolInterface: EB346B97-975F-4A9F-8B22-F8E92BB3D569 FFFEE010  
+Sharing Cpu Driver EP *0xFF2192C0 = 0xFFFE7A80  
+mNsCommBuffer.PhysicalStart - 0xFF600000  
+mNsCommBuffer.PhysicalSize - 0x10000  
+mNsCommBuffer: 0x00000000FF600000 - 0x10000  
+mMpInformationHobData: 0x0000000000000008 - 0x8  
+mMpInformationHobData[0x80000000]: 0, 0, 0  
+mMpInformationHobData[0x80000001]: 0, 1, 1  
+mMpInformationHobData[0x80000002]: 0, 2, 2  
+mMpInformationHobData[0x80000003]: 0, 3, 3  
+mMpInformationHobData[0x80000100]: 1, 0, 0  
+mMpInformationHobData[0x80000101]: 1, 1, 1  
+mMpInformationHobData[0x80000102]: 1, 2, 2  
+mMpInformationHobData[0x80000103]: 1, 3, 3  
+SmiHandlerRegister - GUID A37721E4-8C0B-4BCA-B5E8-E902A025514E - Status 0  
+SmiHandlerRegister - GUID B65694CC-09E3-4C3B-B5CD-05F44D3CDBFF - Status 0  
+SmiHandlerRegister - GUID 7081E22F-CAC6-4053-9468-675782CF88E5 - Status 0  
+SmiHandlerRegister - GUID 60FF8964-E906-41D0-AFED-F241E974E08E - Status 0  
+SmiHandlerRegister - GUID 02CE967A-DD7E-4FFC-9EE7-810CF0470880 - Status 0  
+SmiHandlerRegister - GUID 2A571201-4966-47F6-8B86-F31E41F32F10 - Status 0  
+SmiHandlerRegister - GUID 27ABF055-B1B8-4C26-8048-748F37BAA2DF - Status 0  
+SmiHandlerRegister - GUID 7CE88FB3-4BD7-4679-87A8-A8D8DEE50D2B - Status 0  
+SmmMain Done!  
+Shared Cpu Driver EP 0xFFFE7A80  
+SpStackBase         - 0xFF614000  
+SpSharedBufBase     - 0xFF520000  
+SpPcpuStackSize     - 0x2000  
+SpPcpuSharedBufSize - 0x20000  
+CpuInfo             - 0x80000001  
+Mpidr               - 0x80000001  
+LinearId            - 0x1  
+Flags               - 0x0  
+SpStackBase         - 0xFF616000  
+SpSharedBufBase     - 0xFF540000  
+SpPcpuStackSize     - 0x2000  
+SpPcpuSharedBufSize - 0x20000  
+CpuInfo             - 0x80000002  
+Mpidr               - 0x80000002  
+LinearId            - 0x2  
+Flags               - 0x0  
+SpStackBase         - 0xFF618000  
+SpSharedBufBase     - 0xFF560000  
+SpPcpuStackSize     - 0x2000  
+SpPcpuSharedBufSize - 0x20000  
+CpuInfo             - 0x80000003  
+Mpidr               - 0x80000003  
+LinearId            - 0x3  
+Flags               - 0x0  
+SpStackBase         - 0xFF61A000  
+SpSharedBufBase     - 0xFF580000  
+SpPcpuStackSize     - 0x2000  
+SpPcpuSharedBufSize - 0x20000  
+CpuInfo             - 0x80000100  
+Mpidr               - 0x80000100  
+LinearId            - 0x4  
+Flags               - 0x0  
+SpStackBase         - 0xFF61C000  
+SpSharedBufBase     - 0xFF5A0000  
+SpPcpuStackSize     - 0x2000  
+SpPcpuSharedBufSize - 0x20000  
+CpuInfo             - 0x80000101  
+Mpidr  
 
-#### Output after UefiInfo is executed in UEFI Shell
-`Received event - 0x10 on cpu 0
-SmmEntryPoint ...
-CommBuffer - 0xFFDF3A90, CommBufferSize - 0x20
-SmmUefiInfoHandler
-  SystemTable - 0x00000000EFFE0018
-SmmEntryPoint Done`
+#### Output after UefiInfo is executed in UEFI Shell (FVP UART0)
+FS0:\> UefiInfo.efi  
+add-symbol-file /home/achgup01/work/genfw/uefi/edk2/Build/ArmVExpress-FVP-AArch64-MM-Normal/DEBUG_GCC49/AARCH64/MdeModulePkg/Application/UefiInfoApp/UefiInfo/DEBUG/UefiInfo.dll 0xF5F99000  
+Loading driver at 0x000F5F98000 EntryPoint=0x000F5F99000 UefiInfo.efi  
+0xFF600000 - 0xFEFFF550 - 0x20  
+ARM_SMC_ID_MM_COMMUNICATE_AARCH64 0xC4000041 - 0xFF600000 - 0x0  
+remove-symbol-file /home/achgup01/work/genfw/uefi/edk2/Build/ArmVExpress-FVP-AArch64-MM-Normal/DEBUG_GCC49/AARCH64/MdeModulePkg/Application/UefiInfoApp/UefiInfo/DEBUG/UefiInfo.dll 0xF5F99000  
 
 ### ARM TF (FVP UART0)
-`NOTICE:  Booting Trusted Firmware
-NOTICE:  BL1: v1.3(debug):f15c6ed
-NOTICE:  BL1: Built : 18:21:32, Jan 19 2017
-INFO:    BL1: RAM 0x4036000 - 0x403c000
-INFO:    BL1: Loading BL2
-INFO:    Loading image id=1 at address 0x4014000
-INFO:    Size of image id=1 at address 0x4014000 is 0x81a0
-INFO:    Image id=1 loaded at address 0x4014000, size = 0x81a0
-NOTICE:  BL1: Booting BL2
-INFO:    Entry point address = 0x4014000
-INFO:    SPSR = 0x3c5
-NOTICE:  BL2: v1.3(debug):f15c6ed
-NOTICE:  BL2: Built : 18:21:32, Jan 19 2017
-INFO:    Configuring TrustZone Controller
-INFO:    Configuring NS memory - 0x80000000, 0xfbffffff, 0x200000 bytes
-INFO:    BL2: Loading BL31
-INFO:    Loading image id=3 at address 0x4023000
-INFO:    Size of image id=3 at address 0x4023000 is 0xc018
-INFO:    Image id=3 loaded at address 0x4023000, size = 0xc018
-INFO:    BL2: Loading BL32
-INFO:    Loading image id=4 at address 0xffe00000
-INFO:    Size of image id=4 at address 0xffe00000 is 0x1000
-INFO:    Image id=4 loaded at address 0xffe00000, size = 0x1000
-INFO:    BL2: Loading AP_BL3_SFS_PAYLOAD0
-INFO:    Loading image id=21 at address 0xfc000000
-INFO:    Size of image id=21 at address 0xfc000000 is 0x280000
-INFO:    Image id=21 loaded at address 0xfc000000, size = 0x280000
-INFO:    BL2: ====SFS_PAYLOAD Information====
-INFO:    BL2: image base=0xfc000000
-INFO:    BL2: total base=0xfc000000
-INFO:    BL2: free base=0xfc280000
-INFO:    BL2: stack base=0xffdf8000
-INFO:    BL2: image size=0x280000
-INFO:    BL2: total size=0x3e00000
-INFO:    BL2: free size=0x3b78000
-INFO:    BL2: stack size=0x8000
-INFO:    BL2: mm_mem_regions=0x401c0d0
-INFO:    BL2: mm_mem_regions_size=0xa4
-INFO:    BL2: size of mpinfo_hob_data = 0x208
-INFO:    BL2: hoblist base=0xfc280000
-INFO:    BL2: hoblist size=0x240
-INFO:    BL2: free memory base=0xfc280240
-INFO:    BL2: free memory size=0x3b77dc0
-INFO:    BL2: ===============================
-INFO:    BL2: Loading BL33
-INFO:    Loading image id=5 at address 0x88000000
-INFO:    Size of image id=5 at address 0x88000000 is 0x280000
-INFO:    Image id=5 loaded at address 0x88000000, size = 0x280000
-NOTICE:  BL1: Booting BL31
-INFO:    Entry point address = 0x4023000
-INFO:    SPSR = 0x3cd
-INFO:    BL31: mm payload ep_info=0
-INFO:    BL31: mm payload pc=0xfc000000
-INFO:    BL31: mm payload spsr=0x3c0
-INFO:    BL31: mm payload arg0=0xfc280000
-INFO:    BL31: BL32 free base=0xffe01000
-INFO:    BL31: BL32 l1 base=0xffe01000
-INFO:    BL31: BL32 l1 end=0xffe01020
-INFO:    BL31: BL32 lx base=0xffe02000
-INFO:    BL31: BL32 lx end=0xffe06000
-INFO:    BL31: BL32 free end=NOTICE:  BL31: v1.3(debug):f15c6ed
-NOTICE:  BL31: Built : 18:21:32, Jan 19 2017
-INFO:    GICv3 with legacy support detected. ARM GICV3 driver initialized in EL3
-INFO:    BL31: Initializing runtime services
-INFO:    BL31: Initializing BL32
-INFO:    mm_stub: mm payload stack base=0xffdf9000
-INFO:    BL31: Preparing for EL3 exit to normal world
-INFO:    Entry point address = 0x88000000
-INFO:    SPSR = 0x3c9`
-
-### EDK2 Output (FVP UART0)
-`UEFI firmware (version 2a28be6 built at 18:21:17 on Jan 19 2017)
-add-symbol-file /home/supven01/mm/upstream/edk2/Build/ArmVExpress-FVP-AArch64-Normal-MM/DEBUG_GCC49/AARCH64/ArmPlatformPkg/PrePi/PeiUniCore/DEBUG/ArmPlatformPrePiUniCore.dll 0x88000800
-add-symbol-file /home/supven01/mm/upstream/edk2/Build/ArmVExpress-FVP-AArch64-Normal-MM/DEBUG_GCC49/AARCH64/MdeModulePkg/Core/Dxe/DxeMain/DEBUG/DxeCore.dll 0xF3186000
-Loading DxeCore at 0x00F3185000 EntryPoint=0x00F3186000
-add-symbol-file /home/supven01/mm/upstream/edk2/Build/ArmVExpress-FVP-AArch64-Normal-MM/DEBUG_GCC49/AARCH64/MdeModulePkg/Core/Dxe/DxeMain/DEBUG/DxeCore.dll 0xF3186000
-HOBLIST address in DXE = 0xEFDBD018
-Memory Allocation 0x00000004 0xF3FFB000 - 0xF3FFBFFF
-Memory Allocation 0x00000004 0xF3FFA000 - 0xF3FFAFFF
-Memory Allocation 0x00000004 0xF3FF9000 - 0xF3FF9FFF
-Memory Allocation 0x00000004 0xF3FF8000 - 0xF3FF8FFF
-Memory Allocation 0x00000004 0xF3FFC000 - 0xF3FFFFFF
-Memory Allocation 0x00000004 0xF3FE8000 - 0xF3FF7FFF
-Memory Allocation 0x00000004 0xF38D6000 - 0xF3FE7FFF
-Memory Allocation 0x00000004 0xF31C4000 - 0xF38D5FFF
-Memory Allocation 0x00000004 0xF3185000 - 0xF31C3FFF
-Memory Allocation 0x00000003 0xF3185000 - 0xF31C3FFF
-FV Hob            0x88000000 - 0x8827FFFF
-FV Hob            0xF31C4000 - 0xF38D49FF
-FV2 Hob           0xF31C4000 - 0xF38D49FF
-add-symbol-file /home/supven01/mm/upstream/edk2/Build/ArmVExpress-FVP-AArch64-Normal-MM/DEBUG_GCC49/AARCH64/MdeModulePkg/Universal/PCD/Dxe/Pcd/DEBUG/PcdDxe.dll 0xEFF41000
-Loading driver at 0x000EFF40000 EntryPoint=0x000EFF41048 PcdDxe.efi
-add-symbol-file /home/supven01/mm/upstream/edk2/Build/ArmVExpress-FVP-AArch64-Normal-MM/DEBUG_GCC49/AARCH64/ArmPkg/Drivers/CpuDxe/CpuDxe/DEBUG/ArmCpuDxe.dll 0xEFF31000
-Loading driver at 0x000EFF30000 EntryPoint=0x000EFF31048 ArmCpuDxe.efi
-add-symbol-file /home/supven01/mm/upstream/edk2/Build/ArmVExpress-FVP-AArch64-Normal-MM/DEBUG_GCC49/AARCH64/MdeModulePkg/Core/RuntimeDxe/RuntimeDxe/DEBUG/RuntimeDxe.dll 0xEAF40000
-.
-.
-.
-.
-.
-.
-.
-[2J[04D[=3h[2J[09D[2J[04D[=3h[2J[09D[2J[04D[=3h[2J[09D[2J[04D[=3h[2J[09D[2J[04D[=3h[2J[09D[2J[04D[=3h[2J[09D[0m[35m[40m[0m[37m[40mPress ESCAPE for boot options ..........[Bds]Booting UEFI Misc Device
-[Bds]Booting UEFI Misc Device 2
-[Bds]Booting UEFI Misc Device 3
-[Bds]Booting UEFI Misc Device 4
-[Bds]Booting UEFI Misc Device 5
-[Bds]Booting UEFI Non-Block Boot Device
-[Bds]Booting UEFI Non-Block Boot Device 2
-[Bds]Booting UEFI Non-Block Boot Device 3
-[Bds]Booting UEFI Shell
-add-symbol-file /home/supven01/mm/upstream/edk2/Build/ArmVExpress-FVP-AArch64-Normal-MM/DEBUG_GCC49/AARCH64/ShellPkg/Application/Shell/Shell/DEBUG/Shell.dll 0xEA656000
-Loading driver at 0x000EA655000 EntryPoint=0x000EA656000 Shell.efi
-[2J[44DUEFI Interactive Shell v2.1
-EDK II
-UEFI v2.60 (EDK II, 0x00010000)
-[1m[33m[40mMapping table[0m[37m[40m
-[1m[33m[40m      FS2:[0m[37m[40m [1m[37m[40mAlias(s):[0m[37m[40mF5:
-          VenHw(C5B9C74A-6D72-4719-99AB-C59F199091EB)
-[1m[33m[40m      FS1:[0m[37m[40m [1m[37m[40mAlias(s):[0m[37m[40mF1:
-          MemoryMapped(0xB,0x88000000,0x8827FFFF)
-[1m[33m[40m      FS0:[0m[37m[40m [1m[37m[40mAlias(s):[0m[37m[40mF0:
-          Fv(87940482-FC81-41C3-87E6-399CF85AC8A0)
-[1m[33m[40m     BLK4:[0m[37m[40m [1m[37m[40mAlias(s):[0m[37m[40m
-          VenHw(E7223039-5836-41E1-B542-D7EC736C5E59)
-[1m[33m[40m     BLK0:[0m[37m[40m [1m[37m[40mAlias(s):[0m[37m[40m
-          VenHw(02118005-9DA7-443A-92D5-781F022AEDBB)
-[1m[33m[40m     BLK2:[0m[37m[40m [1m[37m[40mAlias(s):[0m[37m[40m
-          VenHw(1F15DA3C-37FF-4070-B471-BB4AF12A724A)
-[1m[33m[40m     BLK3:[0m[37m[40m [1m[37m[40mAlias(s):[0m[37m[40m
-          VenHw(CC2CBF29-1498-4CDD-8171-F8B6B41D0909)
-[1m[33m[40m     BLK1:[0m[37m[40m [1m[37m[40mAlias(s):[0m[37m[40m
-          VenHw(09831032-6FA3-4484-AF4F-0A000A8D3A82)
-Press [1m[37m[40mESC[0m[37m[40m in 5 seconds to skip [1m[33m[40mstartup.nsh[0m[37m[40m or any other key to continue.[72DPress [1m[37m[40mESC[0m[37m[40m in 4 seconds to skip [1m[33m[40mstartup.nsh[0m[37m[40m or any other key to continue.[72DPress [1m[37m[40mESC[0m[37m[40m in 3 seconds to skip [1m[33m[40mstartup.nsh[0m[37m[40m or any other key to continue.[72DPress [1m[37m[40mESC[0m[37m[40m in 2 seconds to skip [1m[33m[40mstartup.nsh[0m[37m[40m or any other key to continue.[72DPress [1m[37m[40mESC[0m[37m[40m in 1 seconds to skip [1m[33m[40mstartup.nsh[0m[37m[40m or any other key to continue.
-[1m[33m[40mShell> [0m[37m[40m
-`
+NOTICE:  Booting Trusted Firmware  
+NOTICE:  BL1: v1.3(debug):v1.3-659-g6b2b576  
+NOTICE:  BL1: Built : 10:08:00, May 31 2017  
+INFO:    BL1: RAM 0x4036000 - 0x403c000  
+INFO:    BL1: Loading BL2  
+INFO:    Loading image id=1 at address 0x4027000  
+INFO:    Image id=1 loaded: 0x4027000 - 0x402e2a8  
+NOTICE:  BL1: Booting BL2  
+INFO:    Entry point address = 0x4027000  
+INFO:    SPSR = 0x3c5  
+NOTICE:  BL2: v1.3(debug):v1.3-659-g6b2b576  
+NOTICE:  BL2: Built : 10:08:00, May 31 2017  
+INFO:    BL2: Doing platform setup  
+INFO:    Configuring TrustZone Controller  
+INFO:    BL2: Loading image id 3  
+INFO:    Loading image id=3 at address 0xff000000  
+INFO:    Image id=3 loaded: 0xff000000 - 0xff00e218  
+INFO:    BL2: Loading image id 4  
+INFO:    Loading image id=4 at address 0xff200000  
+INFO:    Image id=4 loaded: 0xff200000 - 0xff480000  
+INFO:    BL2: Loading image id 5  
+INFO:    Loading image id=5 at address 0x88000000  
+INFO:    Image id=5 loaded: 0x88000000 - 0x88280000  
+NOTICE:  BL1: Booting BL31  
+INFO:    Entry point address = 0xff000000  
+INFO:    SPSR = 0x3cd  
+NOTICE:  BL31: v1.3(debug):v1.3-659-g6b2b576  
+NOTICE:  BL31: Built : 10:08:00, May 31 2017  
+INFO:    GICv3 with legacy support detected. ARM GICV3 driver initialized in EL3  
+INFO:    BL31: Initializing runtime services  
+INFO:    BL31: Initializing BL32  
+NOTICE:  Received SPM_MEMORY_ATTRIBUTES_SET SMC  
+NOTICE:    Start address  : 0xff219000  
+NOTICE:    Number of pages: 1 (4096 bytes)  
+NOTICE:    Attributes     : 0x7  
+NOTICE:    (Equivalent TF attributes: 0x22)  
+NOTICE:  Received SPM_MEMORY_ATTRIBUTES_SET SMC  
+NOTICE:    Start address  : 0xff219000  
+NOTICE:    Number of pages: 1 (4096 bytes)  
+NOTICE:    Attributes     : 0x5  
+NOTICE:    (Equivalent TF attributes: 0x2a)  
+NOTICE:  Received SPM_MEMORY_ATTRIBUTES_SET SMC  
+NOTICE:    Start address  : 0xff21a000  
+NOTICE:    Number of pages: 1 (4096 bytes)  
+NOTICE:    Attributes     : 0x7  
+NOTICE:    (Equivalent TF attributes: 0x22)  
+NOTICE:  Received SPM_MEMORY_ATTRIBUTES_SET SMC  
+NOTICE:    Start address  : 0xfffe7000  
+NOTICE:    Number of pages: 7 (28672 bytes)  
+NOTICE:    Attributes     : 0x7  
+NOTICE:    (Equivalent TF attributes: 0x22)  
+NOTICE:  Received SPM_MEMORY_ATTRIBUTES_SET SMC  
+NOTICE:    Start address  : 0xfffe7000  
+NOTICE:    Number of pages: 7 (28672 bytes)  
+NOTICE:    Attributes     : 0x3  
+NOTICE:    (Equivalent TF attributes: 0x2)  
+NOTICE:  Received SPM_MEMORY_ATTRIBUTES_SET SMC  
+NOTICE:    Start address  : 0xfffef000  
+NOTICE:    Number of pages: 1 (4096 bytes)  
+NOTICE:    Attributes     : 0x7  
+NOTICE:    (Equivalent TF attributes: 0x22)  
+INFO:    BL31: Preparing for EL3 exit to normal world  
+INFO:    Entry point address = 0x88000000  
+INFO:    SPSR = 0x3c9  
